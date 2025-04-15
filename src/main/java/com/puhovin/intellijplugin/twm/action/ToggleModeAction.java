@@ -47,7 +47,7 @@ public class ToggleModeAction extends ToggleAction {
 
     private void updatePresentation(@NotNull Presentation presentation, boolean isGlobal) {
         presentation.setText(isGlobal ? "Global Mode (Switch to Project)" : "Project Mode (Switch to Global)");
-        presentation.setIcon(isGlobal ? AllIcons.Javaee.WebModuleGroup : AllIcons.Nodes.Module);
+        presentation.setIcon(isGlobal ? AllIcons.Nodes.PpWeb : AllIcons.Nodes.Module);
         presentation.setDescription(isGlobal ?
                 "Settings apply to all projects. Click to switch to project mode." :
                 "Settings apply to current project. Click to switch to global mode.");

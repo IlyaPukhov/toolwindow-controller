@@ -7,7 +7,12 @@ import com.intellij.util.ui.UIUtil;
 import com.puhovin.intellijplugin.twm.model.AvailabilityPreference;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JComboBox;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;

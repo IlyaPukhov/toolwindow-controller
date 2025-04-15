@@ -8,10 +8,13 @@ import com.intellij.util.ui.EmptyIcon;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 
 public class ToolWindowPreferenceCellRenderer extends JLabel implements TableCellRenderer {
     public static final Color SELECTION_BACKGROUND = UIManager.getColor("Table.selectionBackground");

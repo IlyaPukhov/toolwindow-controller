@@ -7,8 +7,10 @@ import com.puhovin.intellijplugin.twm.table.AvailabilityPreferenceJTable;
 import com.puhovin.intellijplugin.twm.table.AvailabilityPreferenceTableModel;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.util.List;
 
 public class PreferredAvailabilitiesView extends JPanel {

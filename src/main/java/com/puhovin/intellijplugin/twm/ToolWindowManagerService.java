@@ -14,7 +14,7 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -68,8 +68,12 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
         } else {
             this.projectState = state;
         }
-        applyCurrentPreferences();
+
+        if (!project.isDisposed()) {
+            applyCurrentPreferences();
+        }
     }
+
 
     @NotNull
     public List<ToolWindowPreference> getAvailableToolWindows() {
