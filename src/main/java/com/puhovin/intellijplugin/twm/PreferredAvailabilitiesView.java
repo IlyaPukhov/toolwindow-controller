@@ -22,7 +22,6 @@ public class PreferredAvailabilitiesView extends JPanel {
 
         ToolWindowManagerService service = project.getService(ToolWindowManagerService.class);
 
-        // Mode toggle
         globalModeCheckbox = new JCheckBox("Use global settings");
         globalModeCheckbox.setSelected(service.isUsingGlobalSettings());
         globalModeCheckbox.addActionListener(e -> {
@@ -41,26 +40,6 @@ public class PreferredAvailabilitiesView extends JPanel {
         if (!project.isDefault()) {
             populateTableModel();
         }
-
-        JPanel buttonPanel = getJPanel(service);
-        add(buttonPanel, BorderLayout.SOUTH);
-    }
-
-    private @NotNull JPanel getJPanel(ToolWindowManagerService service) {
-        JButton resetToDefaultsButton = new JButton("Reset to Defaults");
-        resetToDefaultsButton.addActionListener(e -> {
-            List<ToolWindowPreference> defaults = service.isUsingGlobalSettings()
-                    ? service.getGlobalDefaultAvailabilities()
-                    : service.getDefaultAvailabilities();
-
-            AvailabilityPreferenceTableModel model = (AvailabilityPreferenceTableModel) table.getModel();
-            model.removeToolWindowPreferences();
-            defaults.forEach(model::addToolWindowPreference);
-        });
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(resetToDefaultsButton);
-        return buttonPanel;
     }
 
     private void populateTableModel() {

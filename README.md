@@ -15,13 +15,13 @@ If you open the project in Intellij IDEA, it will be recognized as IDE plugin. *
 plugin and manage its dependencies. If necessary, you can build plugin from sources using command:
 
 ```shell script
-./gradlew buildPlugin
+./gradlew clean buildPlugin
 ``` 
 
 It will produce packaged zip file at:
 
 ```
-build/distributions/twm-advanced-plugin-{version}.zip
+build/distributions/toolwindow-manager-advanced-{version}.zip
 ```
 
 and it can be later manually installed into Intellij IDEA using its *Settings... -> Plugins -> Cog icon on top ->

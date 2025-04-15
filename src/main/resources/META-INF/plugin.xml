@@ -30,6 +30,10 @@
     <resource-bundle>com.puhovin.intellijplugin.twm.ToolWindowManagerBundle</resource-bundle>
 
     <actions>
+        <action id="ToggleModeAction"
+                class="com.puhovin.intellijplugin.twm.action.ToggleModeAction">
+            <add-to-group group-id="ToolsMenu" anchor="last" />
+        </action>
         <group id="ToolWindowManagerActionGroup"
                class="com.puhovin.intellijplugin.twm.action.ToolWindowManagerActionGroup"
                popup="true">
@@ -39,9 +43,6 @@
                     class="com.puhovin.intellijplugin.twm.action.ApplyPreferredAvailabilitiesAction" />
             <action id="ApplyDefaultAvailabilitiesAction"
                     class="com.puhovin.intellijplugin.twm.action.ApplyDefaultAvailabilitiesAction" />
-            <action id="ToggleModeAction"
-                    class="com.puhovin.intellijplugin.twm.action.ToggleGlobalModeAction">
-            </action>
             <add-to-group group-id="ToolsMenu" anchor="last" />
         </group>
     </actions>

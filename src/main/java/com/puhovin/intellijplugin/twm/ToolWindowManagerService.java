@@ -14,8 +14,12 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.util.*;
+import javax.swing.JComponent;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service(Service.Level.PROJECT)
@@ -24,8 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
         @Storage(value = "ToolWindowManagerGlobalSettings.xml", roamingType = RoamingType.DISABLED)
 })
 public final class ToolWindowManagerService implements PersistentStateComponent<ToolWindowPreferenceStore> {
-    private ToolWindowPreferenceStore projectState;
-    private ToolWindowPreferenceStore globalState;
+    private ToolWindowPreferenceStore projectState = new ToolWindowPreferenceStore();
+    private ToolWindowPreferenceStore globalState = new ToolWindowPreferenceStore();
     private boolean useGlobalSettings = true;
     private final Project project;
     private PreferredAvailabilitiesView configurationComponent;
@@ -34,22 +38,15 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
 
     public ToolWindowManagerService(Project project) {
         this.project = project;
+        initializeDefaults();
     }
 
-    @Override
-    public void initializeComponent() {
+    private void initializeDefaults() {
         synchronized (lock) {
-            if (projectState == null) {
-                projectState = new ToolWindowPreferenceStore();
-            }
-            if (globalState == null) {
-                globalState = new ToolWindowPreferenceStore();
-            }
-
             ToolWindowManager manager = ToolWindowManager.getInstance(project);
             for (String id : manager.getToolWindowIds()) {
                 ToolWindow toolWindow = manager.getToolWindow(id);
-                if (toolWindow != null && isValidToolWindowId(id)) {
+                if (toolWindow != null) {
                     AvailabilityPreference defaultPref = toolWindow.isAvailable()
                             ? AvailabilityPreference.AVAILABLE
                             : AvailabilityPreference.UNAVAILABLE;
@@ -57,10 +54,6 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
                 }
             }
         }
-    }
-
-    private boolean isValidToolWindowId(String id) {
-        return id != null && !id.trim().isEmpty();
     }
 
     @Override
@@ -85,7 +78,7 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
 
         for (String id : manager.getToolWindowIds()) {
             ToolWindow tw = manager.getToolWindow(id);
-            if (tw != null && isValidToolWindowId(id)) {
+            if (tw != null) {
                 ToolWindowPreference activePref = getActivePreferences().getOrDefault(
                         id,
                         new ToolWindowPreference(id, AvailabilityPreference.UNAFFECTED)
@@ -153,14 +146,8 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
 
         synchronized (lock) {
             if (useGlobalSettings) {
-                if (globalState == null) {
-                    globalState = new ToolWindowPreferenceStore();
-                }
                 globalState.setAllPreferences(newPrefs);
             } else {
-                if (projectState == null) {
-                    projectState = new ToolWindowPreferenceStore();
-                }
                 projectState.setAllPreferences(newPrefs);
             }
         }
