@@ -1,0 +1,40 @@
+<idea-plugin>
+    <id>com.puhovin.intellijplugin.twm</id>
+    <name>ToolWindow Manager Advanced</name>
+    <vendor email="dinamond2003@gmail.com">Ilya Pukhov</vendor>
+    <description><![CDATA[
+    ### ✨ ToolWindow Manager Advanced
+
+    Take control of your IDE's workspace with **hierarchical ToolWindow management**:
+
+    | Level        | Capabilities                          |
+    |--------------|---------------------------------------|
+    | **Global**   | Set default visibility for all projects |
+    | **Project**  | Override defaults when needed          |
+
+    💡 **Perfect for**:
+    - Teams sharing styleguides but needing project flexibility
+    - Developers working with different tech stacks
+    - Anyone wanting cleaner IDE interface
+  ]]></description>
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij" />
+
+    <resource-bundle>com.puhovin.intellijplugin.twm.ToolWindowManagerBundle</resource-bundle>
+
+    <actions>
+        <group id="ToolWindowManagerActionGroup"
+               class="com.puhovin.intellijplugin.twm.action.ToolWindowManagerActionGroup"
+               popup="true">
+            <action id="ConfigurePreferredAvailabilitiesAction"
+                    class="com.puhovin.intellijplugin.twm.action.ConfigurePreferredAvailabilitiesAction" />
+            <action id="ApplyPreferredAvailabilitiesAction"
+                    class="com.puhovin.intellijplugin.twm.action.ApplyPreferredAvailabilitiesAction" />
+            <action id="ApplyDefaultAvailabilitiesAction"
+                    class="com.puhovin.intellijplugin.twm.action.ApplyDefaultAvailabilitiesAction" />
+            <add-to-group group-id="WindowMenu" anchor="after" relative-to-action="ToolWindowsGroup" />
+        </group>
+    </actions>
+
+</idea-plugin>
