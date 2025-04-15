@@ -28,8 +28,9 @@ java {
 
 tasks {
     patchPluginXml {
-        pluginName = 'twm-advanced-plugin'
+        pluginName = 'ToolWindow Manager'
         sinceBuild = '242'
+        untilBuild = '999.*'
     }
 
     signPlugin {

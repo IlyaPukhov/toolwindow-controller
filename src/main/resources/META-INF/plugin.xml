@@ -2,21 +2,27 @@
     <id>com.puhovin.intellijplugin.twm</id>
     <name>ToolWindow Manager Advanced</name>
     <vendor email="dinamond2003@gmail.com">Ilya Pukhov</vendor>
-    <description><![CDATA[
-    ### ✨ ToolWindow Manager Advanced
+    <description>
+        <![CDATA[
+        <html>
+        <h2>✨ ToolWindow Manager Advanced</h2>
+        <p>Take control of your IDE's workspace with <b>hierarchical ToolWindow management</b>:</p>
 
-    Take control of your IDE's workspace with **hierarchical ToolWindow management**:
+        <table border="1">
+        <tr><th>Level</th><th>Capabilities</th></tr>
+        <tr><td><b>Global</b></td><td>Set default visibility for all projects</td></tr>
+        <tr><td><b>Project</b></td><td>Override defaults when needed</td></tr>
+        </table>
 
-    | Level        | Capabilities                          |
-    |--------------|---------------------------------------|
-    | **Global**   | Set default visibility for all projects |
-    | **Project**  | Override defaults when needed          |
-
-    💡 **Perfect for**:
-    - Teams sharing styleguides but needing project flexibility
-    - Developers working with different tech stacks
-    - Anyone wanting cleaner IDE interface
-  ]]></description>
+        <p>💡 <b>Perfect for</b>:</p>
+        <ul>
+        <li>Teams sharing styleguides but needing project flexibility</li>
+        <li>Developers working with different tech stacks</li>
+        <li>Anyone wanting cleaner IDE interface</li>
+        </ul>
+        </html>
+        ]]>
+    </description>
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij" />
@@ -35,9 +41,8 @@
                     class="com.puhovin.intellijplugin.twm.action.ApplyDefaultAvailabilitiesAction" />
             <action id="ToggleModeAction"
                     class="com.puhovin.intellijplugin.twm.action.ToggleGlobalModeAction">
-                <add-to-group group-id="ToolsMenu" anchor="last" />
             </action>
-            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <add-to-group group-id="ToolsMenu" anchor="last" />
         </group>
     </actions>
 
