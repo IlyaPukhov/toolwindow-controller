@@ -17,15 +17,15 @@ java {
 }
 
 intellij {
-  pluginName = 'intellij-plugin-twm'
-  version = '2023.2.1'
+  pluginName = 'twm-advanced-plugin'
+  version = '2024.2.1'
   plugins = []
   type = 'IC'
 }
 
 tasks {
   patchPluginXml {
-    sinceBuild.set("232")
+    sinceBuild.set("242")
   }
 
   signPlugin {

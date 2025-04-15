@@ -1,7 +1,7 @@
 # ToolWindow Manager Advanced for IntelliJ IDEA
 
 ***Rework of [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager) plugin for IntelliJ IDEA
-2023+***
+2024.2+***
 
 Plugin allows you to set visibility preferences to known Tool Windows like
 *Bookmarks*, *Notifications* etc. and automatically show or hide them for
@@ -11,7 +11,7 @@ each project.
 
 ### How to build / run / install plugin
 
-If you open the project in Intellij IDEA, it will be recognized as IDE plugin. **Gradle (>=8.3)** is used to build the
+If you open the project in Intellij IDEA, it will be recognized as IDE plugin. **Gradle (>=8.12)** is used to build the
 plugin and manage its dependencies. If necessary, you can build plugin from sources using command:
 
 ```shell script
