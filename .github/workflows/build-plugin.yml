@@ -3,6 +3,7 @@ name: Build Plugin
 on:
   push:
     branches: [ master ]
+  workflow_dispatch:
 
 env:
   COMMIT_SHORT: $(git rev-parse --short ${{ github.sha }})
@@ -22,7 +23,9 @@ jobs:
           cache: 'gradle'
 
       - name: Build plugin with Gradle
-        run: ./gradlew buildPlugin
+        run: |
+          chmod +x gradlew
+          ./gradlew buildPlugin
 
       - name: Install GitHub CLI
         run: sudo apt-get update && sudo apt-get install -y gh
@@ -34,7 +37,7 @@ jobs:
         run: |
           gh release create "build-$COMMIT_SHORT" \
             ./build/distributions/*.zip \
-            --title "Build $COMMIT_SHORT ($(date +'%Y-%m-%d'))" \
+            --title "Build $COMMIT_SHORT ($(date +'%d.%m.%Y'))" \
             --notes "Automatic build from commit ${{ github.sha }}"
 
       - name: Show release URL
