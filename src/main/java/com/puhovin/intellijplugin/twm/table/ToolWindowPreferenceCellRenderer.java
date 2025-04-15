@@ -19,7 +19,6 @@ public class ToolWindowPreferenceCellRenderer extends JLabel implements TableCel
     public static final Border FOCUS_CELL_HIGHLIGHT_BORDER = UIManager.getBorder("Table.focusCellHighlightBorder");
     private final Color unselectedBackground;
     private final Color unselectedForeground;
-
     private final Project project;
 
     public ToolWindowPreferenceCellRenderer(@NotNull Project project, @NotNull Color bg) {

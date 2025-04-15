@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.puhovin.intellijplugin.twm.ToolWindowManagerBundle;
@@ -51,7 +50,7 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
                 }
 
                 @Override
-                public void apply() throws ConfigurationException {
+                public void apply() {
                     projectComponent.apply();
                 }
 

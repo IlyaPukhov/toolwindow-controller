@@ -13,7 +13,7 @@ public class ToolWindowManagerActionGroup extends DefaultActionGroup {
     public void update(AnActionEvent e) {
         final Project project = (Project) e.getDataContext().getData(CommonDataKeys.PROJECT.getName());
 
-        e.getPresentation().setVisible(project != null && !project.isDefault());
+        e.getPresentation().setEnabledAndVisible(project != null && !project.isDefault());
     }
 
     @Override

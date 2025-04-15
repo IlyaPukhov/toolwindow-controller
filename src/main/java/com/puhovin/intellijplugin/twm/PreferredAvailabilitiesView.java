@@ -9,51 +9,72 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collections;
 import java.util.List;
 
 public class PreferredAvailabilitiesView extends JPanel {
     private final Project project;
-    private final JScrollPane scrollPane;
     private final AvailabilityPreferenceJTable table;
+    private final JCheckBox globalModeCheckbox;
 
     public PreferredAvailabilitiesView(Project project) {
+        super(new BorderLayout());
         this.project = project;
-        table = new AvailabilityPreferenceJTable(project, new AvailabilityPreferenceTableModel());
-        setLayout(new BorderLayout());
-        setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-        scrollPane = new JBScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(400, 300));
-        add(scrollPane, BorderLayout.CENTER);
 
-        SwingUtilities.invokeLater(() -> {
-            Component component = scrollPane.getViewport().getView();
+        ToolWindowManagerService service = project.getService(ToolWindowManagerService.class);
 
-            if (component != null) {
-                scrollPane.getViewport().setBackground(component.getBackground());
-            }
+        // Mode toggle
+        globalModeCheckbox = new JCheckBox("Use global settings");
+        globalModeCheckbox.setSelected(service.isUsingGlobalSettings());
+        globalModeCheckbox.addActionListener(e -> {
+            boolean useGlobal = globalModeCheckbox.isSelected();
+            service.setUseGlobalSettings(useGlobal);
+            populateTableModel();
         });
+
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.add(globalModeCheckbox);
+        add(topPanel, BorderLayout.NORTH);
+
+        table = new AvailabilityPreferenceJTable(project, new AvailabilityPreferenceTableModel());
+        add(new JBScrollPane(table), BorderLayout.CENTER);
 
         if (!project.isDefault()) {
             populateTableModel();
         }
+
+        JPanel buttonPanel = getJPanel(service);
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private @NotNull JPanel getJPanel(ToolWindowManagerService service) {
+        JButton resetToDefaultsButton = new JButton("Reset to Defaults");
+        resetToDefaultsButton.addActionListener(e -> {
+            List<ToolWindowPreference> defaults = service.isUsingGlobalSettings()
+                    ? service.getGlobalDefaultAvailabilities()
+                    : service.getDefaultAvailabilities();
+
+            AvailabilityPreferenceTableModel model = (AvailabilityPreferenceTableModel) table.getModel();
+            model.removeToolWindowPreferences();
+            defaults.forEach(model::addToolWindowPreference);
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(resetToDefaultsButton);
+        return buttonPanel;
     }
 
     private void populateTableModel() {
-        final AvailabilityPreferenceTableModel tableModel = (AvailabilityPreferenceTableModel) table.getModel();
-        final ToolWindowManagerService component = project.getService(ToolWindowManagerService.class);
-        final List<ToolWindowPreference> toolWindowPreferences = component.getPreferredAvailabilities();
+        AvailabilityPreferenceTableModel model = (AvailabilityPreferenceTableModel) table.getModel();
+        model.removeToolWindowPreferences();
 
-        tableModel.removeToolWindowPreferences();
-
-        for (final ToolWindowPreference toolWindowPreference : toolWindowPreferences) {
-            tableModel.addToolWindowPreference(toolWindowPreference);
-        }
+        project.getService(ToolWindowManagerService.class)
+                .getAvailableToolWindows()
+                .forEach(model::addToolWindowPreference);
     }
 
-    @NotNull List<ToolWindowPreference> getCurrentViewState() {
-        final AvailabilityPreferenceTableModel model = (AvailabilityPreferenceTableModel) table.getModel();
-        return Collections.unmodifiableList(model.getToolWindowPreferences());
+    @NotNull
+    public List<ToolWindowPreference> getCurrentViewState() {
+        return ((AvailabilityPreferenceTableModel) table.getModel()).getToolWindowPreferences();
     }
 
     public void reset() {

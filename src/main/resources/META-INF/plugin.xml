@@ -33,7 +33,11 @@
                     class="com.puhovin.intellijplugin.twm.action.ApplyPreferredAvailabilitiesAction" />
             <action id="ApplyDefaultAvailabilitiesAction"
                     class="com.puhovin.intellijplugin.twm.action.ApplyDefaultAvailabilitiesAction" />
-            <add-to-group group-id="WindowMenu" anchor="after" relative-to-action="ToolWindowsGroup" />
+            <action id="ToggleModeAction"
+                    class="com.puhovin.intellijplugin.twm.action.ToggleGlobalModeAction">
+                <add-to-group group-id="ToolsMenu" anchor="last" />
+            </action>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
     </actions>
 

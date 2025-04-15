@@ -7,19 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ToolWindowPreferenceStore implements Serializable {
-
-    private Map<String, ToolWindowPreference> allPreferences = new HashMap<>();
-
-    public ToolWindowPreferenceStore() {
-    }
+    private Map<String, ToolWindowPreference> preferences = new HashMap<>();
 
     @NotNull
     public Map<String, ToolWindowPreference> getAllPreferences() {
-        return allPreferences;
+        return new HashMap<>(preferences);
     }
 
-    public void setAllPreferences(@NotNull Map<String, ToolWindowPreference> allPreferences) {
-        this.allPreferences = allPreferences;
+    public void setAllPreferences(@NotNull Map<String, ToolWindowPreference> prefs) {
+        this.preferences = new HashMap<>(prefs);
     }
-
 }

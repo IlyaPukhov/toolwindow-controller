@@ -15,7 +15,7 @@ If you open the project in Intellij IDEA, it will be recognized as IDE plugin. *
 plugin and manage its dependencies. If necessary, you can build plugin from sources using command:
 
 ```shell script
-gradle buildPlugin
+./gradlew buildPlugin
 ``` 
 
 It will produce packaged zip file at:
@@ -26,10 +26,3 @@ build/distributions/twm-advanced-plugin-{version}.zip
 
 and it can be later manually installed into Intellij IDEA using its *Settings... -> Plugins -> Cog icon on top ->
 Install Plugin from Disk...* option.
-
-You can run plugin within sand-boxed IDE instance. IDEA will provide run configuration by-default, but you can also use
-command:
-
-```shell script
-gradle runIde
-```

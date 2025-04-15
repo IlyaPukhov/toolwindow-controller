@@ -10,7 +10,9 @@ public class ApplyDefaultAvailabilitiesAction extends AbstractApplyAvailabilitie
 
     @Override
     @NotNull
-    protected List<ToolWindowPreference> getPreferencesToApply(@NotNull ToolWindowManagerService toolWindowManagerProjectComponent) {
-        return toolWindowManagerProjectComponent.getDefaultAvailabilities();
+    protected List<ToolWindowPreference> getPreferencesToApply(@NotNull ToolWindowManagerService service) {
+        return service.isUsingGlobalSettings()
+                ? service.getGlobalDefaultAvailabilities()
+                : service.getDefaultAvailabilities();
     }
 }
