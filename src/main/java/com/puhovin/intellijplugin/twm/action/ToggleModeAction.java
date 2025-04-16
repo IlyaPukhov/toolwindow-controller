@@ -38,7 +38,6 @@ public class ToggleModeAction extends ToggleAction {
         super.update(e);
         Project project = e.getProject();
         boolean enabled = project != null && !project.isDefault();
-        e.getPresentation().setEnabled(enabled);
 
         if (enabled) {
             updatePresentation(e.getPresentation(), isSelected(e));
@@ -46,10 +45,12 @@ public class ToggleModeAction extends ToggleAction {
     }
 
     private void updatePresentation(@NotNull Presentation presentation, boolean isGlobal) {
-        presentation.setText(isGlobal ? "Global Mode (Switch to Project)" : "Project Mode (Switch to Global)");
-        presentation.setIcon(isGlobal ? AllIcons.Nodes.PpWeb : AllIcons.Nodes.Module);
-        presentation.setDescription(isGlobal ?
-                "Settings apply to all projects. Click to switch to project mode." :
-                "Settings apply to current project. Click to switch to global mode.");
+        if (isGlobal) {
+            presentation.setText("Global Mode (Switch to Project)");
+            presentation.setIcon(AllIcons.Javaee.WebModuleGroup);
+        } else {
+            presentation.setText("Project Mode (Switch to Global)");
+            presentation.setIcon(AllIcons.Nodes.Module);
+        }
     }
 }

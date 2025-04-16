@@ -1,5 +1,6 @@
 package com.puhovin.intellijplugin.twm;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -17,34 +18,42 @@ public class ToolWindowPreferenceApplier {
     }
 
     public void applyPreferencesFrom(@NotNull List<ToolWindowPreference> toolWindowPreferences) {
-        if (!project.isDefault()) {
-            final ToolWindowManagerService projectComponent = project.getService(ToolWindowManagerService.class);
-            final ToolWindowManager manager = ToolWindowManager.getInstance(project);
+        if (project.isDefault()) return;
 
-            for (final ToolWindowPreference toolWindowPreference : toolWindowPreferences) {
-                final String id = toolWindowPreference.id();
-                final ToolWindow tw = manager.getToolWindow(id);
+        ApplicationManager.getApplication().invokeLater(() -> {
+                    final ToolWindowManagerService projectComponent = project.getService(ToolWindowManagerService.class);
+                    final ToolWindowManager manager = ToolWindowManager.getInstance(project);
 
-                if (tw != null) {
-                    AvailabilityPreference preference = toolWindowPreference.availabilityPreference();
+                    for (final ToolWindowPreference toolWindowPreference : toolWindowPreferences) {
+                        final String id = toolWindowPreference.id();
+                        final ToolWindow tw = manager.getToolWindow(id);
 
-                    switch (preference) {
-                        case AVAILABLE:
-                            tw.setAvailable(true, null);
-                            break;
-                        case UNAFFECTED:
-                            final ToolWindowPreference defaultAvailability = projectComponent.getDefaultAvailability(id);
+                        if (tw != null) {
+                            AvailabilityPreference preference = toolWindowPreference.availabilityPreference();
 
-                            if (defaultAvailability != null) {
-                                tw.setAvailable(defaultAvailability.availabilityPreference() == AvailabilityPreference.AVAILABLE, null);
+                            boolean newAvailableState = false;
+
+                            switch (preference) {
+                                case AVAILABLE:
+                                    newAvailableState = true;
+                                    break;
+                                case UNAFFECTED:
+                                    final ToolWindowPreference defaultAvailability = projectComponent.getDefaultAvailability(id);
+                                    if (defaultAvailability != null) {
+                                        newAvailableState = (defaultAvailability.availabilityPreference() == AvailabilityPreference.AVAILABLE);
+                                    }
+                                    break;
+                                case UNAVAILABLE:
+                                    break;
                             }
-                            break;
-                        case UNAVAILABLE:
-                            tw.setAvailable(false, null);
-                            break;
+
+                            if (tw.isAvailable() != newAvailableState) {
+                                tw.setAvailable(newAvailableState, null);
+                            }
+                        }
                     }
                 }
-            }
-        }
+        );
     }
+
 }

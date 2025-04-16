@@ -84,10 +84,13 @@ public class AvailabilityPreferenceJTable extends JBTable {
         final AvailabilityPreference availabilityPreference =
                 (AvailabilityPreference) getValueAt(row, AvailabilityPreferenceJTable.AVAILABILITY_PREFERENCE_COLUMN_INDEX);
 
-        result = switch (availabilityPreference) {
+        final AvailabilityPreference effectivePreference = (availabilityPreference != null) ? availabilityPreference : AvailabilityPreference.UNAFFECTED;
+
+        result = switch (effectivePreference) {
             case AVAILABLE ->
                     new ToolWindowPreferenceCellRenderer(project, JBColor.namedColor("FileColor.Green", new JBColor(0xeffae7, 0x49544a)));
-            case UNAFFECTED -> new ToolWindowPreferenceCellRenderer(project, JBColor.WHITE);
+            case UNAFFECTED ->
+                    new ToolWindowPreferenceCellRenderer(project, JBColor.WHITE);
             case UNAVAILABLE ->
                     new ToolWindowPreferenceCellRenderer(project, JBColor.namedColor("FileColor.Rose", new JBColor(0xf2dcda, 0x6e535b)));
         };

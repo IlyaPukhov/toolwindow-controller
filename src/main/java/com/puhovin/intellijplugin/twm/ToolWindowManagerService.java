@@ -14,13 +14,14 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service(Service.Level.PROJECT)
 @State(name = "ToolWindowManagerSettings", storages = {
@@ -33,16 +34,18 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
     private boolean useGlobalSettings = true;
     private final Project project;
     private PreferredAvailabilitiesView configurationComponent;
-    private final Map<String, ToolWindowPreference> defaultPreferences = new ConcurrentHashMap<>();
-    private final Object lock = new Object();
+    private final Map<String, ToolWindowPreference> defaultPreferences = new HashMap<>();
+    private final Lock lock = new ReentrantLock();
 
     public ToolWindowManagerService(Project project) {
         this.project = project;
         initializeDefaults();
+        applyCurrentPreferences();
     }
 
     private void initializeDefaults() {
-        synchronized (lock) {
+        lock.lock();
+        try {
             ToolWindowManager manager = ToolWindowManager.getInstance(project);
             for (String id : manager.getToolWindowIds()) {
                 ToolWindow toolWindow = manager.getToolWindow(id);
@@ -53,6 +56,8 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
                     defaultPreferences.put(id, new ToolWindowPreference(id, defaultPref));
                 }
             }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -69,11 +74,8 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
             this.projectState = state;
         }
 
-        if (!project.isDisposed()) {
-            applyCurrentPreferences();
-        }
+        applyCurrentPreferences();
     }
-
 
     @NotNull
     public List<ToolWindowPreference> getAvailableToolWindows() {
@@ -91,13 +93,13 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
             }
         }
 
-        result.sort(Comparator.comparing(ToolWindowPreference::id));
+        result.sort(Comparator.comparing(ToolWindowPreference::id, Comparator.nullsLast(Comparator.naturalOrder())));
         return result;
     }
 
     public void setUseGlobalSettings(boolean useGlobal) {
         this.useGlobalSettings = useGlobal;
-        applyCurrentPreferences();
+        loadState(getState());
     }
 
     public boolean isUsingGlobalSettings() {
@@ -144,19 +146,22 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
     }
 
     public void apply() {
-        List<ToolWindowPreference> editedPrefs = configurationComponent.getCurrentViewState();
-        Map<String, ToolWindowPreference> newPrefs = new HashMap<>();
-        editedPrefs.forEach(p -> newPrefs.put(p.id(), p));
+        lock.lock();
+        try {
+            List<ToolWindowPreference> editedPrefs = configurationComponent.getCurrentViewState();
+            Map<String, ToolWindowPreference> newPrefs = new HashMap<>();
+            editedPrefs.forEach(p -> newPrefs.put(p.id(), p));
 
-        synchronized (lock) {
             if (useGlobalSettings) {
                 globalState.setAllPreferences(newPrefs);
             } else {
                 projectState.setAllPreferences(newPrefs);
             }
-        }
 
-        applyCurrentPreferences();
+            applyCurrentPreferences();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public boolean isModified() {
@@ -170,10 +175,19 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
         );
 
         return configurationComponent.getCurrentViewState().stream()
-                .anyMatch(editedPref ->
-                        !currentPrefs.getOrDefault(editedPref.id(), AvailabilityPreference.UNAFFECTED)
-                                .equals(editedPref.availabilityPreference())
-                );
+                .anyMatch(editedPref -> {
+                    AvailabilityPreference currentPref = currentPrefs.getOrDefault(editedPref.id(), AvailabilityPreference.UNAFFECTED);
+                    if (currentPref == null) {
+                        currentPref = AvailabilityPreference.UNAFFECTED;
+                    }
+
+                    AvailabilityPreference editedAvailability = editedPref.availabilityPreference();
+                    if (editedAvailability == null) {
+                        editedAvailability = AvailabilityPreference.UNAFFECTED;
+                    }
+
+                    return !currentPref.equals(editedAvailability);
+                });
     }
 
     public void reset() {
