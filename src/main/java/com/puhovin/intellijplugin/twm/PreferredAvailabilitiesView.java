@@ -16,13 +16,13 @@ import java.util.List;
 
 public class PreferredAvailabilitiesView extends JPanel {
     private final AvailabilityPreferenceJTable table;
+    private final ToolWindowManagerDispatcher dispatcher;
 
-    public PreferredAvailabilitiesView(Project project) {
+    public PreferredAvailabilitiesView(@NotNull Project project, @NotNull ToolWindowManagerDispatcher dispatcher) {
         super(new BorderLayout());
+        this.dispatcher = dispatcher;
 
-        ToolWindowManagerDispatcher dispatcher = new ToolWindowManagerDispatcher(project);
-
-        JPanel topPanel = initializePanel(dispatcher);
+        JPanel topPanel = initializePanel();
         add(topPanel, BorderLayout.NORTH);
 
         table = new AvailabilityPreferenceJTable(project, new AvailabilityPreferenceTableModel());
@@ -31,7 +31,7 @@ public class PreferredAvailabilitiesView extends JPanel {
         populateTableModel(dispatcher.getAvailableToolWindows());
     }
 
-    private @NotNull JPanel initializePanel(ToolWindowManagerDispatcher dispatcher) {
+    private @NotNull JPanel initializePanel() {
         JCheckBox globalModeCheckbox = new JCheckBox("Use global settings");
         globalModeCheckbox.setSelected(dispatcher.getSettingsMode().getValue());
         globalModeCheckbox.setFocusPainted(false);
@@ -57,7 +57,7 @@ public class PreferredAvailabilitiesView extends JPanel {
         return ((AvailabilityPreferenceTableModel) table.getModel()).getToolWindowPreferences();
     }
 
-    public void reset(List<ToolWindowPreference> defaultPreferences) {
+    public void reset(@NotNull List<ToolWindowPreference> defaultPreferences) {
         populateTableModel(defaultPreferences);
     }
 }

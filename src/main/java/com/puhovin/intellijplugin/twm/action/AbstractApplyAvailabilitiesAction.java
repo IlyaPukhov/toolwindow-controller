@@ -19,16 +19,14 @@ public abstract class AbstractApplyAvailabilitiesAction extends AnAction {
         Project project = e.getProject();
         if (project == null || project.isDefault()) return;
 
-        ToolWindowManagerDispatcher dispatcher = new ToolWindowManagerDispatcher(project);
+        ToolWindowManagerDispatcher dispatcher = ToolWindowManagerDispatcher.getInstance(project);
         List<ToolWindowPreference> prefs = getPreferencesToApply(dispatcher);
 
         Map<String, ToolWindowPreference> newPrefs = new HashMap<>();
         prefs.forEach(pref -> newPrefs.put(pref.getId(), pref));
 
-        if (dispatcher.getState() != null) {
-            dispatcher.getState().setAllPreferences(newPrefs);
-            new ToolWindowPreferenceApplier(project).applyPreferencesFrom(prefs);
-        }
+        dispatcher.applyPreferences(newPrefs);
+        new ToolWindowPreferenceApplier(project).applyPreferencesFrom(prefs);
     }
 
     @NotNull

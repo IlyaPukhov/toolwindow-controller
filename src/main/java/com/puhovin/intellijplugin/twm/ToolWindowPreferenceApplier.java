@@ -13,9 +13,11 @@ import java.util.Optional;
 
 public class ToolWindowPreferenceApplier {
     private final Project project;
+    private final ToolWindowManagerDispatcher dispatcher;
 
     public ToolWindowPreferenceApplier(@NotNull Project project) {
         this.project = project;
+        this.dispatcher = ToolWindowManagerDispatcher.getInstance(project);
     }
 
     public void applyPreferencesFrom(@NotNull List<ToolWindowPreference> preferences) {
@@ -23,20 +25,19 @@ public class ToolWindowPreferenceApplier {
 
         ApplicationManager.getApplication().invokeLater(() -> {
             ToolWindowManager manager = ToolWindowManager.getInstance(project);
-            ToolWindowManagerDispatcher dispatcher = new ToolWindowManagerDispatcher(project);
 
             preferences.stream()
-                    .map(pref -> resolvePreference(dispatcher, pref))
+                    .map(this::resolvePreference)
                     .forEach(pref -> applyPreference(manager, pref));
         });
     }
 
-    private ToolWindowPreference resolvePreference(ToolWindowManagerDispatcher service, ToolWindowPreference pref) {
+    private ToolWindowPreference resolvePreference(ToolWindowPreference pref) {
         if (pref.getAvailabilityPreference() != AvailabilityPreference.UNAFFECTED) {
             return pref;
         }
 
-        return Optional.ofNullable(service.getDefaultAvailability(pref.getId()))
+        return Optional.ofNullable(dispatcher.getDefaultAvailability(pref.getId()))
                 .orElse(pref);
     }
 

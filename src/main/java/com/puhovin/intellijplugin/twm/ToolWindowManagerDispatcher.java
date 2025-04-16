@@ -1,63 +1,84 @@
 package com.puhovin.intellijplugin.twm;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.puhovin.intellijplugin.twm.model.SettingsMode;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
-import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
-import com.puhovin.intellijplugin.twm.settingsmanager.GlobalToolWindowManagerService;
-import com.puhovin.intellijplugin.twm.settingsmanager.ProjectToolWindowManagerService;
 import com.puhovin.intellijplugin.twm.settingsmanager.SettingsManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JComponent;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.puhovin.intellijplugin.twm.model.SettingsMode.GLOBAL;
-import static com.puhovin.intellijplugin.twm.model.SettingsMode.PROJECT;
-
+@Service(Service.Level.APP)
 public final class ToolWindowManagerDispatcher implements PersistentStateComponent<ToolWindowPreferenceStore> {
+
+    private static ToolWindowManagerDispatcher globalInstance;
+    private final SettingsManager settingsManager;
+    private SettingsMode settingsMode = SettingsMode.GLOBAL;
     private final Project project;
 
-    private final Map<SettingsMode, SettingsManager> settingsManagerMap = new EnumMap<>(SettingsMode.class);
-    private SettingsMode settingsMode = GLOBAL;
-
-    public ToolWindowManagerDispatcher(Project project) {
+    private ToolWindowManagerDispatcher(Project project) {
         this.project = project;
-        initializeSettingsManager();
+        this.settingsManager = new SettingsManager(project);
     }
 
-    private void initializeSettingsManager() {
-        settingsManagerMap.putIfAbsent(GLOBAL, ApplicationManager.getApplication().getService(GlobalToolWindowManagerService.class));
-
-        if (project != null && !project.isDefault()) {
-            settingsManagerMap.putIfAbsent(PROJECT, project.getService(ProjectToolWindowManagerService.class));
+    public static ToolWindowManagerDispatcher getInstance(@Nullable Project project) {
+        if (project == null) {
+            if (globalInstance == null) {
+                synchronized (ToolWindowManagerDispatcher.class) {
+                    if (globalInstance == null) {
+                        globalInstance = ApplicationManager.getApplication().getService(ToolWindowManagerDispatcher.class);
+                    }
+                }
+            }
+            return globalInstance;
+        } else {
+            return new ToolWindowManagerDispatcher(project);
         }
     }
 
-    public void switchSettingsMode(SettingsMode settingsMode) {
-        this.settingsMode = settingsMode;
-        initializeSettingsManager();
+    private SettingsManager getActiveManager() {
+        return settingsManager;
     }
 
-    public SettingsMode getSettingsMode() {
-        return settingsMode;
+    public void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences) {
+        settingsManager.applyPreferences(preferences);
     }
 
-    public void applyPreferences(Map<String, ToolWindowPreference> preferences) {
-        settingsManagerMap.get(settingsMode).applyPreferences(preferences);
+    public void apply() {
+        List<ToolWindowPreference> editedPrefs = configurationComponent.getCurrentViewState();
+        Map<String, ToolWindowPreference> newPrefs = settingsManager.mapPreferences(editedPrefs);
+        settingsManager.applyPreferences(newPrefs);
+        applyCurrentPreferences(newPrefs);
     }
 
-    public void resetToDefaultPreferences() {
-        settingsManagerMap.get(settingsMode).resetToDefaults();
+    private void applyCurrentPreferences(Map<String, ToolWindowPreference> newPrefs) {
+        // Применяем визуально в IDE
+        // implement your logic here
+    }
+
+    public List<ToolWindowPreference> getPreferredAvailabilities() {
+        return settingsManager.getPreferredAvailabilities();
+    }
+
+    public void resetToDefaults() {
+        settingsManager.resetToDefaults();
     }
 
     public boolean isModified() {
-        return settingsManagerMap.get(settingsMode).isModified();
+        return settingsManager.isModified();
+    }
+
+    public ToolWindowPreference getAvailability(@NotNull String id) {
+        return settingsManager.getAvailability(id);
+    }
+
+    public List<ToolWindowPreference> getAvailableToolWindows() {
+        return settingsManager.getAvailableToolWindows();
     }
 
     @Override
@@ -66,32 +87,28 @@ public final class ToolWindowManagerDispatcher implements PersistentStateCompone
     }
 
     @Override
-    public void loadState(@NotNull ToolWindowPreferenceStore toolWindowPreferenceStore) {
-
+    public void loadState(@NotNull ToolWindowPreferenceStore state) {
+        // Handle loading state if necessary
     }
 
-    @NotNull
-    public List<ToolWindowPreference> getDefaultAvailabilities() {
-        return settingsManagerMap.get(settingsMode).getAvailabilities();
+    public void setSettingsMode(SettingsMode mode) {
+        this.settingsMode = mode;
     }
 
-    public ToolWindowPreference getDefaultAvailability(String id) {
-        return settingsManagerMap.get(settingsMode).getAvailability(id);
+    public SettingsMode getSettingsMode() {
+        return settingsMode;
     }
 
-    public @NotNull List<ToolWindowPreference> getPreferredAvailabilities() {
-        return settingsManagerMap.get(settingsMode).getPreferredAvailabilities();
+    public void switchSettingsMode(SettingsMode settingsMode) {
+        this.settingsMode = settingsMode;
+        settingsManager.setSettingsMode(settingsMode);
     }
 
     public JComponent createComponent() {
-        return null;
+        return settingsManager.createComponent();
     }
 
-    public void apply() {}
-
-    public void disposeUIResources() {}
-
-    public List<ToolWindowPreference> getAvailableToolWindows() {
-        return settingsManagerMap.get(settingsMode).getAvailableToolWindows();
+    public void disposeUIResources() {
+        settingsManager.disposeUIResources();
     }
 }
