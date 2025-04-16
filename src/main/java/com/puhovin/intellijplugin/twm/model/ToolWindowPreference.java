@@ -1,10 +1,17 @@
 package com.puhovin.intellijplugin.twm.model;
 
+import com.intellij.util.xmlb.annotations.Attribute;
+import com.intellij.util.xmlb.annotations.Tag;
+
 import java.io.Serializable;
 
+@Tag("toolwindow")
 public class ToolWindowPreference implements Serializable {
 
+    @Attribute("id")
     private String id;
+
+    @Attribute("preference")
     private AvailabilityPreference availabilityPreference;
 
     public ToolWindowPreference() {}
