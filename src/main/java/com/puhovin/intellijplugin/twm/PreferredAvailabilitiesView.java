@@ -16,7 +16,7 @@ import java.util.List;
 
 public class PreferredAvailabilitiesView extends JPanel {
     private final AvailabilityPreferenceJTable table;
-    private final ToolWindowManagerDispatcher dispatcher;
+    private final transient ToolWindowManagerDispatcher dispatcher;
 
     public PreferredAvailabilitiesView(@NotNull Project project, @NotNull ToolWindowManagerDispatcher dispatcher) {
         super(new BorderLayout());
@@ -35,6 +35,7 @@ public class PreferredAvailabilitiesView extends JPanel {
         JCheckBox globalModeCheckbox = new JCheckBox("Use global settings");
         globalModeCheckbox.setSelected(dispatcher.getSettingsMode().getValue());
         globalModeCheckbox.setFocusPainted(false);
+        globalModeCheckbox.setFocusable(false);
         globalModeCheckbox.addActionListener(e -> {
             boolean useGlobal = globalModeCheckbox.isSelected();
             dispatcher.switchSettingsMode(SettingsMode.fromBoolean(useGlobal));

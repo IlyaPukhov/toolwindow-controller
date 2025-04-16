@@ -1,12 +1,13 @@
 package com.puhovin.intellijplugin.twm;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.puhovin.intellijplugin.twm.model.AvailabilityPreference;
 import com.puhovin.intellijplugin.twm.model.SettingsMode;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
-import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import com.puhovin.intellijplugin.twm.settingsmanager.GlobalToolWindowManagerService;
 import com.puhovin.intellijplugin.twm.settingsmanager.ProjectToolWindowManagerService;
 import com.puhovin.intellijplugin.twm.settingsmanager.SettingsManager;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JComponent;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -22,21 +24,27 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public final class ToolWindowManagerDispatcher implements PersistentStateComponent<ToolWindowPreferenceStore> {
+public final class ToolWindowManagerDispatcher {
     private final Project project;
     private PreferredAvailabilitiesView configurationComponent;
     private final Lock lock = new ReentrantLock();
 
     private final Map<SettingsMode, SettingsManager> settingsManagerMap = new EnumMap<>(SettingsMode.class);
     private SettingsMode settingsMode = SettingsMode.GLOBAL;
+    private static final Key<ToolWindowManagerDispatcher> KEY = Key.create("ToolWindowManagerDispatcher");
+
+    public static ToolWindowManagerDispatcher getInstance(@NotNull Project project) {
+        ToolWindowManagerDispatcher dispatcher = project.getUserData(KEY);
+        if (dispatcher == null) {
+            dispatcher = new ToolWindowManagerDispatcher(project);
+            project.putUserData(KEY, dispatcher);
+        }
+        return dispatcher;
+    }
 
     private ToolWindowManagerDispatcher(Project project) {
         this.project = project;
         initializeSettingsManagerMap();
-    }
-
-    public static ToolWindowManagerDispatcher getInstance(@NotNull Project project) {
-        return new ToolWindowManagerDispatcher(project);
     }
 
     private void initializeSettingsManagerMap() {
@@ -57,16 +65,6 @@ public final class ToolWindowManagerDispatcher implements PersistentStateCompone
 
     public SettingsManager getCurrentSettingsManager() {
         return settingsManagerMap.get(settingsMode);
-    }
-
-    @Override
-    public ToolWindowPreferenceStore getState() {
-        return getCurrentSettingsManager().getState();
-    }
-
-    @Override
-    public void loadState(@NotNull ToolWindowPreferenceStore state) {
-        applyCurrentPreferences();
     }
 
     public void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences) {
@@ -113,14 +111,31 @@ public final class ToolWindowManagerDispatcher implements PersistentStateCompone
 
         return configurationComponent.getCurrentViewState().stream()
                 .anyMatch(editedPref -> {
-                    AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.getId())).orElse(AvailabilityPreference.UNAFFECTED);
-                    AvailabilityPreference edited = Optional.ofNullable(editedPref.getAvailabilityPreference()).orElse(AvailabilityPreference.UNAFFECTED);
+                    AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.getId()))
+                            .orElse(AvailabilityPreference.UNAFFECTED);
+                    AvailabilityPreference edited = Optional.ofNullable(editedPref.getAvailabilityPreference())
+                            .orElse(AvailabilityPreference.UNAFFECTED);
                     return !current.equals(edited);
                 });
     }
 
     public List<ToolWindowPreference> getAvailableToolWindows() {
-        return getCurrentSettingsManager().getAvailableToolWindows();
+        List<ToolWindowPreference> result = new ArrayList<>();
+        ToolWindowManager manager = ToolWindowManager.getInstance(project);
+
+        for (String id : manager.getToolWindowIds()) {
+            ToolWindow tw = manager.getToolWindow(id);
+            if (tw != null) {
+                ToolWindowPreference defaultPref = getCurrentSettingsManager().getDefaultPreferences()
+                        .getOrDefault(id, new ToolWindowPreference(id, AvailabilityPreference.UNAFFECTED));
+                ToolWindowPreference pref = getCurrentSettingsManager().getState().getAllPreferences().getOrDefault(
+                        id, defaultPref);
+                result.add(pref);
+            }
+        }
+
+        result.sort(Comparator.comparing(ToolWindowPreference::getId, Comparator.nullsLast(Comparator.naturalOrder())));
+        return result;
     }
 
     public JComponent createComponent() {
@@ -137,9 +152,12 @@ public final class ToolWindowManagerDispatcher implements PersistentStateCompone
         try {
             getCurrentSettingsManager().resetToDefaults();
             applyCurrentPreferences();
-            if (configurationComponent != null) {
-                configurationComponent.reset(getDefaultAvailabilities());
+
+            if (configurationComponent == null) {
+                configurationComponent = new PreferredAvailabilitiesView(project, this);
             }
+
+            configurationComponent.reset(getDefaultAvailabilities());
         } finally {
             lock.unlock();
         }
