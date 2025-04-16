@@ -23,7 +23,7 @@ public abstract class AbstractApplyAvailabilitiesAction extends AnAction {
         List<ToolWindowPreference> prefs = getPreferencesToApply(service);
 
         Map<String, ToolWindowPreference> newPrefs = new HashMap<>();
-        prefs.forEach(p -> newPrefs.put(p.id(), p));
+        prefs.forEach(p -> newPrefs.put(p.getId(), p));
 
         assert service.getState() != null;
         service.getState().setAllPreferences(newPrefs);

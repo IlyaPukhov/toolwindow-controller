@@ -36,7 +36,7 @@ public class AvailabilityPreferenceTableModel extends AbstractTableModel {
                     MessageFormat.format(INVALID_ROW_INDEX_MESSAGE, 0, toolWindowPreferences.size() - 1, rowIndex));
         }
 
-        return toolWindowPreferences.get(rowIndex).id();
+        return toolWindowPreferences.get(rowIndex).getId();
     }
 
     private AvailabilityPreference getAvailabilityPreference(final int rowIndex) {
@@ -45,7 +45,7 @@ public class AvailabilityPreferenceTableModel extends AbstractTableModel {
                     MessageFormat.format(INVALID_ROW_INDEX_MESSAGE, 0, toolWindowPreferences.size() - 1, rowIndex));
         }
 
-        return toolWindowPreferences.get(rowIndex).availabilityPreference();
+        return toolWindowPreferences.get(rowIndex).getAvailabilityPreference();
     }
 
     public void addToolWindowPreference(@NotNull final ToolWindowPreference toolWindowPreference) {
@@ -100,9 +100,9 @@ public class AvailabilityPreferenceTableModel extends AbstractTableModel {
 
         final ToolWindowPreference newRowValue = switch (columnIndex) {
             case AvailabilityPreferenceJTable.TOOL_WINDOW_ID_COLUMN_INDEX ->
-                    new ToolWindowPreference((String) aValue, currentRowValue.availabilityPreference());
+                    new ToolWindowPreference((String) aValue, currentRowValue.getAvailabilityPreference());
             case AvailabilityPreferenceJTable.AVAILABILITY_PREFERENCE_COLUMN_INDEX ->
-                    new ToolWindowPreference(currentRowValue.id(), (AvailabilityPreference) aValue);
+                    new ToolWindowPreference(currentRowValue.getId(), (AvailabilityPreference) aValue);
             default -> null;
         };
 

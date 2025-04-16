@@ -95,7 +95,7 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
             }
         }
 
-        result.sort(Comparator.comparing(ToolWindowPreference::id, Comparator.nullsLast(Comparator.naturalOrder())));
+        result.sort(Comparator.comparing(ToolWindowPreference::getId, Comparator.nullsLast(Comparator.naturalOrder())));
         return result;
     }
 
@@ -154,7 +154,7 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
         try {
             List<ToolWindowPreference> editedPrefs = configurationComponent.getCurrentViewState();
             Map<String, ToolWindowPreference> newPrefs = new HashMap<>();
-            editedPrefs.forEach(pref -> newPrefs.put(pref.id(), pref));
+            editedPrefs.forEach(pref -> newPrefs.put(pref.getId(), pref));
 
             if (useGlobalSettings) {
                 globalState.setAllPreferences(newPrefs);
@@ -173,13 +173,13 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
 
         Map<String, AvailabilityPreference> currentPrefs = new HashMap<>();
         getActivePreferences().values().forEach(pref ->
-                currentPrefs.put(pref.id(), pref.availabilityPreference())
+                currentPrefs.put(pref.getId(), pref.getAvailabilityPreference())
         );
 
         return configurationComponent.getCurrentViewState().stream()
                 .anyMatch(editedPref -> {
-                    AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.id())).orElse(AvailabilityPreference.UNAFFECTED);
-                    AvailabilityPreference edited = Optional.ofNullable(editedPref.availabilityPreference()).orElse(AvailabilityPreference.UNAFFECTED);
+                    AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.getId())).orElse(AvailabilityPreference.UNAFFECTED);
+                    AvailabilityPreference edited = Optional.ofNullable(editedPref.getAvailabilityPreference()).orElse(AvailabilityPreference.UNAFFECTED);
                     return !current.equals(edited);
                 });
     }

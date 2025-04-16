@@ -14,11 +14,11 @@ public class ToolWindowPreference implements Serializable {
         this.availabilityPreference = availabilityPreference;
     }
 
-    public String id() {
+    public String getId() {
         return id;
     }
 
-    public AvailabilityPreference availabilityPreference() {
+    public AvailabilityPreference getAvailabilityPreference() {
         return availabilityPreference;
     }
 

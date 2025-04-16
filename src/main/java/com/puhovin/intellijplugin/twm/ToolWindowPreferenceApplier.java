@@ -9,6 +9,7 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ToolWindowPreferenceApplier {
     private final Project project;
@@ -17,43 +18,40 @@ public class ToolWindowPreferenceApplier {
         this.project = project;
     }
 
-    public void applyPreferencesFrom(@NotNull List<ToolWindowPreference> toolWindowPreferences) {
+    public void applyPreferencesFrom(@NotNull List<ToolWindowPreference> preferences) {
         if (project.isDefault()) return;
 
         ApplicationManager.getApplication().invokeLater(() -> {
-                    final ToolWindowManagerService projectComponent = project.getService(ToolWindowManagerService.class);
-                    final ToolWindowManager manager = ToolWindowManager.getInstance(project);
+            ToolWindowManager manager = ToolWindowManager.getInstance(project);
+            ToolWindowManagerService service = project.getService(ToolWindowManagerService.class);
 
-                    for (final ToolWindowPreference toolWindowPreference : toolWindowPreferences) {
-                        final String id = toolWindowPreference.id();
-                        final ToolWindow tw = manager.getToolWindow(id);
-
-                        if (tw != null) {
-                            AvailabilityPreference preference = toolWindowPreference.availabilityPreference();
-
-                            boolean newAvailableState = false;
-
-                            switch (preference) {
-                                case AVAILABLE:
-                                    newAvailableState = true;
-                                    break;
-                                case UNAFFECTED:
-                                    final ToolWindowPreference defaultAvailability = projectComponent.getDefaultAvailability(id);
-                                    if (defaultAvailability != null) {
-                                        newAvailableState = (defaultAvailability.availabilityPreference() == AvailabilityPreference.AVAILABLE);
-                                    }
-                                    break;
-                                case UNAVAILABLE:
-                                    break;
-                            }
-
-                            if (tw.isAvailable() != newAvailableState) {
-                                tw.setAvailable(newAvailableState, null);
-                            }
-                        }
-                    }
-                }
-        );
+            preferences.stream()
+                    .map(pref -> resolvePreference(service, pref))
+                    .forEach(pref -> applyPreference(manager, pref));
+        });
     }
 
+    private ToolWindowPreference resolvePreference(ToolWindowManagerService service, ToolWindowPreference pref) {
+        if (pref.getAvailabilityPreference() != AvailabilityPreference.UNAFFECTED) {
+            return pref;
+        }
+
+        return Optional.ofNullable(service.getDefaultAvailability(pref.getId()))
+                .orElse(pref);
+    }
+
+    private void applyPreference(ToolWindowManager manager, ToolWindowPreference pref) {
+        ToolWindow tw = manager.getToolWindow(pref.getId());
+        if (tw == null) return;
+
+        Boolean desiredState = switch (pref.getAvailabilityPreference()) {
+            case AVAILABLE -> true;
+            case UNAVAILABLE -> false;
+            default -> null;
+        };
+
+        if (desiredState != null && tw.isAvailable() != desiredState) {
+            tw.setAvailable(desiredState, null);
+        }
+    }
 }
