@@ -56,7 +56,7 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
 
                 @Override
                 public void reset() {
-                    projectComponent.reset();
+                    projectComponent.resetToDefaultPreferences();
                 }
 
                 @Override

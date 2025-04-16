@@ -10,14 +10,14 @@ import org.jetbrains.annotations.NotNull;
 public class ToolWindowManagerActionGroup extends DefaultActionGroup {
 
     @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
+    }
+
+    @Override
     public void update(AnActionEvent e) {
         final Project project = (Project) e.getDataContext().getData(CommonDataKeys.PROJECT.getName());
 
         e.getPresentation().setEnabledAndVisible(project != null && !project.isDefault());
-    }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return super.getActionUpdateThread();
     }
 }

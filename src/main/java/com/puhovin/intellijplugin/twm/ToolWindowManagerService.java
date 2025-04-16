@@ -14,7 +14,7 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -184,9 +184,20 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
                 });
     }
 
-    public void reset() {
-        if (configurationComponent != null) {
-            configurationComponent.reset();
+    public void resetToDefaultPreferences() {
+        lock.lock();
+        try {
+            if (useGlobalSettings) {
+                globalState.setAllPreferences(defaultPreferences);
+            } else {
+                projectState.setAllPreferences(defaultPreferences);
+            }
+            applyCurrentPreferences();
+            if (configurationComponent != null) {
+                configurationComponent.reset();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 

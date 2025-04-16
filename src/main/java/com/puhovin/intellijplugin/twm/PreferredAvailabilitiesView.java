@@ -14,9 +14,8 @@ import java.awt.FlowLayout;
 import java.util.List;
 
 public class PreferredAvailabilitiesView extends JPanel {
-    private final Project project;
+    private final transient Project project;
     private final AvailabilityPreferenceJTable table;
-    private final JCheckBox globalModeCheckbox;
 
     public PreferredAvailabilitiesView(Project project) {
         super(new BorderLayout());
@@ -24,8 +23,19 @@ public class PreferredAvailabilitiesView extends JPanel {
 
         ToolWindowManagerService service = project.getService(ToolWindowManagerService.class);
 
-        globalModeCheckbox = new JCheckBox("Use global settings");
+        JPanel topPanel = initializePanel(service);
+        add(topPanel, BorderLayout.NORTH);
+
+        table = new AvailabilityPreferenceJTable(project, new AvailabilityPreferenceTableModel());
+        add(new JBScrollPane(table), BorderLayout.CENTER);
+
+        populateTableModel();
+    }
+
+    private @NotNull JPanel initializePanel(ToolWindowManagerService service) {
+        JCheckBox globalModeCheckbox = new JCheckBox("Use global settings");
         globalModeCheckbox.setSelected(service.isUsingGlobalSettings());
+        globalModeCheckbox.setFocusPainted(false);
         globalModeCheckbox.addActionListener(e -> {
             boolean useGlobal = globalModeCheckbox.isSelected();
             service.setUseGlobalSettings(useGlobal);
@@ -34,14 +44,7 @@ public class PreferredAvailabilitiesView extends JPanel {
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.add(globalModeCheckbox);
-        add(topPanel, BorderLayout.NORTH);
-
-        table = new AvailabilityPreferenceJTable(project, new AvailabilityPreferenceTableModel());
-        add(new JBScrollPane(table), BorderLayout.CENTER);
-
-        if (!project.isDefault()) {
-            populateTableModel();
-        }
+        return topPanel;
     }
 
     private void populateTableModel() {

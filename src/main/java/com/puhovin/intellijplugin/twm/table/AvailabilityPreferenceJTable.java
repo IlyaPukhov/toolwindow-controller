@@ -21,8 +21,8 @@ import javax.swing.table.TableModel;
 public class AvailabilityPreferenceJTable extends JBTable {
     public static final int TOOL_WINDOW_ID_COLUMN_INDEX = 0;
     public static final int AVAILABILITY_PREFERENCE_COLUMN_INDEX = 1;
-    private final TableCellEditor availabilityPreferenceCellEditor;
-    private final Project project;
+    private final transient TableCellEditor availabilityPreferenceCellEditor;
+    private final transient Project project;
 
     public AvailabilityPreferenceJTable(@NotNull Project project, TableModel model) {
         super(model);
