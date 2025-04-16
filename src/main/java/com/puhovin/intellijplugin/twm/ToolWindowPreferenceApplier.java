@@ -23,15 +23,15 @@ public class ToolWindowPreferenceApplier {
 
         ApplicationManager.getApplication().invokeLater(() -> {
             ToolWindowManager manager = ToolWindowManager.getInstance(project);
-            ToolWindowManagerService service = project.getService(ToolWindowManagerService.class);
+            ToolWindowManagerDispatcher dispatcher = new ToolWindowManagerDispatcher(project);
 
             preferences.stream()
-                    .map(pref -> resolvePreference(service, pref))
+                    .map(pref -> resolvePreference(dispatcher, pref))
                     .forEach(pref -> applyPreference(manager, pref));
         });
     }
 
-    private ToolWindowPreference resolvePreference(ToolWindowManagerService service, ToolWindowPreference pref) {
+    private ToolWindowPreference resolvePreference(ToolWindowManagerDispatcher service, ToolWindowPreference pref) {
         if (pref.getAvailabilityPreference() != AvailabilityPreference.UNAFFECTED) {
             return pref;
         }

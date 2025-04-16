@@ -14,7 +14,7 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
         @Storage("ToolWindowManagerSettings.xml"),
         @Storage(value = "ToolWindowManagerGlobalSettings.xml", roamingType = RoamingType.DISABLED)
 })
-public final class ToolWindowManagerService implements PersistentStateComponent<ToolWindowPreferenceStore> {
+public final class _ToolWindowManagerService implements PersistentStateComponent<ToolWindowPreferenceStore> {
     private ToolWindowPreferenceStore projectState = new ToolWindowPreferenceStore();
     private ToolWindowPreferenceStore globalState = new ToolWindowPreferenceStore();
     private boolean useGlobalSettings = true;
@@ -38,7 +38,7 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
     private final Map<String, ToolWindowPreference> defaultPreferences = new HashMap<>();
     private final Lock lock = new ReentrantLock();
 
-    public ToolWindowManagerService(Project project) {
+    public _ToolWindowManagerService(Project project) {
         this.project = project;
         initializeDefaults();
         applyCurrentPreferences();
@@ -194,7 +194,7 @@ public final class ToolWindowManagerService implements PersistentStateComponent<
             }
             applyCurrentPreferences();
             if (configurationComponent != null) {
-                configurationComponent.reset();
+                configurationComponent.reset(defaultPreferences);
             }
         } finally {
             lock.unlock();

@@ -3,7 +3,7 @@ package com.puhovin.intellijplugin.twm.action;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.puhovin.intellijplugin.twm.ToolWindowManagerService;
+import com.puhovin.intellijplugin.twm.ToolWindowManagerDispatcher;
 import com.puhovin.intellijplugin.twm.ToolWindowPreferenceApplier;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import org.jetbrains.annotations.NotNull;
@@ -19,18 +19,18 @@ public abstract class AbstractApplyAvailabilitiesAction extends AnAction {
         Project project = e.getProject();
         if (project == null || project.isDefault()) return;
 
-        ToolWindowManagerService service = project.getService(ToolWindowManagerService.class);
-        List<ToolWindowPreference> prefs = getPreferencesToApply(service);
+        ToolWindowManagerDispatcher dispatcher = new ToolWindowManagerDispatcher(project);
+        List<ToolWindowPreference> prefs = getPreferencesToApply(dispatcher);
 
         Map<String, ToolWindowPreference> newPrefs = new HashMap<>();
         prefs.forEach(pref -> newPrefs.put(pref.getId(), pref));
 
-        if (service.getState() != null) {
-            service.getState().setAllPreferences(newPrefs);
+        if (dispatcher.getState() != null) {
+            dispatcher.getState().setAllPreferences(newPrefs);
             new ToolWindowPreferenceApplier(project).applyPreferencesFrom(prefs);
         }
     }
 
     @NotNull
-    protected abstract List<ToolWindowPreference> getPreferencesToApply(@NotNull ToolWindowManagerService service);
+    protected abstract List<ToolWindowPreference> getPreferencesToApply(@NotNull ToolWindowManagerDispatcher dispatcher);
 }

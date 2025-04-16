@@ -7,7 +7,7 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.puhovin.intellijplugin.twm.ToolWindowManagerBundle;
-import com.puhovin.intellijplugin.twm.ToolWindowManagerService;
+import com.puhovin.intellijplugin.twm.ToolWindowManagerDispatcher;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
@@ -21,8 +21,7 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
         final Project project = (Project) e.getDataContext().getData(CommonDataKeys.PROJECT.getName());
 
         if (project != null && !project.isDefault()) {
-            final ToolWindowManagerService projectComponent =
-                    project.getService(ToolWindowManagerService.class);
+            ToolWindowManagerDispatcher dispatcher = new ToolWindowManagerDispatcher(project);
 
             ShowSettingsUtil.getInstance().editConfigurable(project, new Configurable() {
 
@@ -41,27 +40,27 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
 
                 @Override
                 public JComponent createComponent() {
-                    return projectComponent.createComponent();
+                    return dispatcher.createComponent();
                 }
 
                 @Override
                 public boolean isModified() {
-                    return projectComponent.isModified();
+                    return dispatcher.isModified();
                 }
 
                 @Override
                 public void apply() {
-                    projectComponent.apply();
+                    dispatcher.apply();
                 }
 
                 @Override
                 public void reset() {
-                    projectComponent.resetToDefaultPreferences();
+                    dispatcher.resetToDefaultPreferences();
                 }
 
                 @Override
                 public void disposeUIResources() {
-                    projectComponent.disposeUIResources();
+                    dispatcher.disposeUIResources();
                 }
             });
         }
