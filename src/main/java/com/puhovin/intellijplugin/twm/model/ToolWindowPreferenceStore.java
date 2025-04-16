@@ -2,6 +2,7 @@ package com.puhovin.intellijplugin.twm.model;
 
 import com.intellij.util.xmlb.annotations.Tag;
 import com.intellij.util.xmlb.annotations.XCollection;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,12 +18,12 @@ public class ToolWindowPreferenceStore implements Serializable {
     @XCollection
     private final List<ToolWindowPreference> preferences = new ArrayList<>();
 
-    public void setAllPreferences(Map<String, ToolWindowPreference> preferencesMap) {
+    public void setAllPreferences(@NotNull Map<String, ToolWindowPreference> preferencesMap) {
         preferences.clear();
         preferencesMap.forEach((id, pref) -> preferences.add(new ToolWindowPreference(id, pref.getAvailabilityPreference())));
     }
 
-    public Map<String, ToolWindowPreference> getAllPreferences() {
+    public @NotNull Map<String, ToolWindowPreference> getAllPreferences() {
         return preferences.stream()
                 .collect(toMap(ToolWindowPreference::getId, Function.identity()));
     }

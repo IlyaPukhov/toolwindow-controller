@@ -14,13 +14,11 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -64,11 +62,6 @@ public final class _ToolWindowManagerService implements PersistentStateComponent
     }
 
     @Override
-    public @Nullable ToolWindowPreferenceStore getState() {
-        return useGlobalSettings ? globalState : projectState;
-    }
-
-    @Override
     public void loadState(@NotNull ToolWindowPreferenceStore state) {
         if (useGlobalSettings) {
             this.globalState = state;
@@ -97,20 +90,6 @@ public final class _ToolWindowManagerService implements PersistentStateComponent
 
         result.sort(Comparator.comparing(ToolWindowPreference::getId, Comparator.nullsLast(Comparator.naturalOrder())));
         return result;
-    }
-
-    public void setUseGlobalSettings(boolean useGlobal) {
-        this.useGlobalSettings = useGlobal;
-        applyCurrentPreferences();
-    }
-
-    public boolean isUsingGlobalSettings() {
-        return useGlobalSettings;
-    }
-
-    private void applyCurrentPreferences() {
-        List<ToolWindowPreference> prefs = new ArrayList<>(getActivePreferences().values());
-        new ToolWindowPreferenceApplier(project).applyPreferencesFrom(prefs);
     }
 
     @NotNull
@@ -144,66 +123,6 @@ public final class _ToolWindowManagerService implements PersistentStateComponent
                 : getDefaultAvailabilities();
     }
 
-    public JComponent createComponent() {
-        configurationComponent = new PreferredAvailabilitiesView(project);
-        return configurationComponent;
-    }
-
-    public void apply() {
-        lock.lock();
-        try {
-            List<ToolWindowPreference> editedPrefs = configurationComponent.getCurrentViewState();
-            Map<String, ToolWindowPreference> newPrefs = new HashMap<>();
-            editedPrefs.forEach(pref -> newPrefs.put(pref.getId(), pref));
-
-            if (useGlobalSettings) {
-                globalState.setAllPreferences(newPrefs);
-            } else {
-                projectState.setAllPreferences(newPrefs);
-            }
-
-            applyCurrentPreferences();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public boolean isModified() {
-        if (configurationComponent == null) return false;
-
-        Map<String, AvailabilityPreference> currentPrefs = new HashMap<>();
-        getActivePreferences().values().forEach(pref ->
-                currentPrefs.put(pref.getId(), pref.getAvailabilityPreference())
-        );
-
-        return configurationComponent.getCurrentViewState().stream()
-                .anyMatch(editedPref -> {
-                    AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.getId())).orElse(AvailabilityPreference.UNAFFECTED);
-                    AvailabilityPreference edited = Optional.ofNullable(editedPref.getAvailabilityPreference()).orElse(AvailabilityPreference.UNAFFECTED);
-                    return !current.equals(edited);
-                });
-    }
-
-    public void resetToDefaultPreferences() {
-        lock.lock();
-        try {
-            if (useGlobalSettings) {
-                globalState.setAllPreferences(defaultPreferences);
-            } else {
-                projectState.setAllPreferences(defaultPreferences);
-            }
-            applyCurrentPreferences();
-            if (configurationComponent != null) {
-                configurationComponent.reset(defaultPreferences);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void disposeUIResources() {
-        configurationComponent = null;
-    }
 
     @Nullable
     public ToolWindowPreference getDefaultAvailability(@NotNull String id) {

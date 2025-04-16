@@ -10,17 +10,18 @@ import java.util.Map;
 
 public interface SettingsManager extends PersistentStateComponent<ToolWindowPreferenceStore> {
 
+    @Override
+    @NotNull ToolWindowPreferenceStore getState();
+
     void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences);
 
-    boolean isModified();
+    @NotNull List<ToolWindowPreference> getPreferredAvailabilities();
 
-    void resetToDefaults();
+    @NotNull List<ToolWindowPreference> getDefaultAvailabilities();
+
+    ToolWindowPreference getDefaultAvailability(String id);
 
     List<ToolWindowPreference> getAvailableToolWindows();
 
-    List<ToolWindowPreference> getAvailabilities();
-
-    ToolWindowPreference getAvailability(String id);
-
-    @NotNull List<ToolWindowPreference> getPreferredAvailabilities();
+    void resetToDefaults();
 }

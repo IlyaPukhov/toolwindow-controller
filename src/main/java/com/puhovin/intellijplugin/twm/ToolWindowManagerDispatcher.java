@@ -3,6 +3,7 @@ package com.puhovin.intellijplugin.twm;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.project.Project;
+import com.puhovin.intellijplugin.twm.model.AvailabilityPreference;
 import com.puhovin.intellijplugin.twm.model.SettingsMode;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
@@ -10,19 +11,18 @@ import com.puhovin.intellijplugin.twm.settingsmanager.GlobalToolWindowManagerSer
 import com.puhovin.intellijplugin.twm.settingsmanager.ProjectToolWindowManagerService;
 import com.puhovin.intellijplugin.twm.settingsmanager.SettingsManager;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JComponent;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class ToolWindowManagerDispatcher implements PersistentStateComponent<ToolWindowPreferenceStore> {
-    private static ToolWindowManagerDispatcher globalInstance;
-
     private final Project project;
     private PreferredAvailabilitiesView configurationComponent;
     private final Lock lock = new ReentrantLock();
@@ -55,22 +55,20 @@ public final class ToolWindowManagerDispatcher implements PersistentStateCompone
         this.settingsMode = settingsMode;
     }
 
-    // Получение текущего менеджера настроек в зависимости от выбранного режима
     public SettingsManager getCurrentSettingsManager() {
         return settingsManagerMap.get(settingsMode);
     }
 
     @Override
-    public @Nullable ToolWindowPreferenceStore getState() {
-        return null; // Реализуйте сохранение состояния, если требуется
+    public ToolWindowPreferenceStore getState() {
+        return getCurrentSettingsManager().getState();
     }
 
     @Override
     public void loadState(@NotNull ToolWindowPreferenceStore state) {
-        // Загрузка состояния, если необходимо
+        applyCurrentPreferences();
     }
 
-    // Применение предпочтений из переданных данных
     public void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences) {
         lock.lock();
         try {
@@ -80,7 +78,6 @@ public final class ToolWindowManagerDispatcher implements PersistentStateCompone
         }
     }
 
-    // Применение текущих предпочтений
     public void apply() {
         lock.lock();
         try {
@@ -91,68 +88,68 @@ public final class ToolWindowManagerDispatcher implements PersistentStateCompone
             }
 
             getCurrentSettingsManager().applyPreferences(newPrefs);
-            applyCurrentPreferences(newPrefs);
+            applyCurrentPreferences();
         } finally {
             lock.unlock();
         }
     }
 
-    // Применение визуальных изменений в IDE
-    private void applyCurrentPreferences(Map<String, ToolWindowPreference> newPrefs) {
-        // Применяем визуально в IDE
-        // Реализуйте вашу логику здесь
+    private void applyCurrentPreferences() {
+        List<ToolWindowPreference> prefs = new ArrayList<>(getCurrentSettingsManager().getState().getAllPreferences().values());
+        new ToolWindowPreferenceApplier(project).applyPreferencesFrom(prefs);
     }
 
-    // Получение предпочтений доступных окон инструментов
     public List<ToolWindowPreference> getPreferredAvailabilities() {
         return getCurrentSettingsManager().getPreferredAvailabilities();
     }
 
-    // Сброс предпочтений к значениям по умолчанию
-    public void resetToDefaults() {
-        getCurrentSettingsManager().resetToDefaults();
-    }
-
-    // Проверка, были ли изменения
     public boolean isModified() {
-        return getCurrentSettingsManager().isModified();
+        if (configurationComponent == null) return false;
+
+        Map<String, AvailabilityPreference> currentPrefs = new HashMap<>();
+        getCurrentSettingsManager().getState().getAllPreferences().values().forEach(pref ->
+                currentPrefs.put(pref.getId(), pref.getAvailabilityPreference())
+        );
+
+        return configurationComponent.getCurrentViewState().stream()
+                .anyMatch(editedPref -> {
+                    AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.getId())).orElse(AvailabilityPreference.UNAFFECTED);
+                    AvailabilityPreference edited = Optional.ofNullable(editedPref.getAvailabilityPreference()).orElse(AvailabilityPreference.UNAFFECTED);
+                    return !current.equals(edited);
+                });
     }
 
-    // Получение предпочтений для конкретного окна инструмента
-    public ToolWindowPreference getAvailability(@NotNull String id) {
-        return getCurrentSettingsManager().getAvailability(id);
-    }
-
-    // Получение списка доступных окон инструментов
     public List<ToolWindowPreference> getAvailableToolWindows() {
         return getCurrentSettingsManager().getAvailableToolWindows();
     }
 
-    // Создание компонента для UI
     public JComponent createComponent() {
-        return getCurrentSettingsManager().createComponent();
+        configurationComponent = new PreferredAvailabilitiesView(project, this);
+        return configurationComponent;
     }
 
-    // Освобождение ресурсов UI
     public void disposeUIResources() {
-        getCurrentSettingsManager().disposeUIResources();
+        configurationComponent = null;
     }
 
-    // Сброс всех предпочтений к дефолтным значениям
     public void resetToDefaultPreferences() {
         lock.lock();
         try {
-            getCurrentSettingsManager().resetToDefaultPreferences();
+            getCurrentSettingsManager().resetToDefaults();
+            applyCurrentPreferences();
+            if (configurationComponent != null) {
+                configurationComponent.reset(getDefaultAvailabilities());
+            }
         } finally {
             lock.unlock();
         }
     }
 
     public @NotNull List<ToolWindowPreference> getDefaultAvailabilities() {
-        return null;
+        return getCurrentSettingsManager().getDefaultAvailabilities();
     }
 
     public ToolWindowPreference getDefaultAvailability(String id) {
-        return null;
+        return getCurrentSettingsManager().getDefaultAvailability(id);
     }
 }
