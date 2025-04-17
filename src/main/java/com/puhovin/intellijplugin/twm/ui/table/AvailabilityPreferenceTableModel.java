@@ -1,6 +1,6 @@
 package com.puhovin.intellijplugin.twm.ui.table;
 
-import com.puhovin.intellijplugin.twm.ToolWindowManagerBundle;
+import com.puhovin.intellijplugin.twm.util.ToolWindowManagerBundle;
 import com.puhovin.intellijplugin.twm.model.AvailabilityPreference;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import org.jetbrains.annotations.NonNls;

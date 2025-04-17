@@ -2,7 +2,7 @@ package com.puhovin.intellijplugin.twm.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.puhovin.intellijplugin.twm.ToolWindowManagerDispatcher;
+import com.puhovin.intellijplugin.twm.core.ToolWindowManagerDispatcher;
 import org.jetbrains.annotations.NotNull;
 
 public final class PreferredAvailabilitiesViewHolder {

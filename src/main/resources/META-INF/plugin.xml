@@ -21,10 +21,10 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <postStartupActivity implementation="com.puhovin.intellijplugin.twm.ResetToolWindowsToDefaultsOnStartup" />
+        <postStartupActivity implementation="com.puhovin.intellijplugin.twm.initialization.ResetToolWindowsToDefaultsOnStartup" />
     </extensions>
 
-    <resource-bundle>com.puhovin.intellijplugin.twm.ToolWindowManagerBundle</resource-bundle>
+    <resource-bundle>com.puhovin.intellijplugin.twm.util.ToolWindowManagerBundle</resource-bundle>
 
     <actions>
         <group id="ToolWindowManagerActionGroup"

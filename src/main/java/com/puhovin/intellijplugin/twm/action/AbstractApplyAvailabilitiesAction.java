@@ -3,7 +3,7 @@ package com.puhovin.intellijplugin.twm.action;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.puhovin.intellijplugin.twm.ToolWindowManagerDispatcher;
+import com.puhovin.intellijplugin.twm.core.ToolWindowManagerDispatcher;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,6 +1,6 @@
 package com.puhovin.intellijplugin.twm.model;
 
-import com.puhovin.intellijplugin.twm.ToolWindowManagerBundle;
+import com.puhovin.intellijplugin.twm.util.ToolWindowManagerBundle;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;

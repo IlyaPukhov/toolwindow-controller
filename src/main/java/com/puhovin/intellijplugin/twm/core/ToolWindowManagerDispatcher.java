@@ -1,4 +1,4 @@
-package com.puhovin.intellijplugin.twm;
+package com.puhovin.intellijplugin.twm.core;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
@@ -30,7 +30,31 @@ import static com.puhovin.intellijplugin.twm.model.AvailabilityPreference.AVAILA
 import static com.puhovin.intellijplugin.twm.model.AvailabilityPreference.UNAFFECTED;
 import static com.puhovin.intellijplugin.twm.model.AvailabilityPreference.UNAVAILABLE;
 
+/**
+ * The ToolWindowManagerDispatcher is responsible for managing and dispatching the preferences of tool windows
+ * within a given project. It handles the initialization, application, and resetting of tool window preferences.
+ * It provides functionality for switching between global and project-level settings for tool windows, applying
+ * changes to the preferences, and ensuring that preferences are correctly reflected when the project is opened.
+ *
+ * <p>This class uses a lock mechanism to ensure thread safety when applying or resetting preferences, ensuring that
+ * the tool window configurations are not modified concurrently in a multi-threaded environment.</p>
+ *
+ * <p>Key responsibilities of this class:</p>
+ * <ul>
+ *     <li>Initializing and managing tool window preferences for both global and project-specific settings.</li>
+ *     <li>Applying changes to the tool window preferences based on user modifications or system configurations.</li>
+ *     <li>Resetting tool windows to their default states when required.</li>
+ *     <li>Switching between global and project-level settings.</li>
+ * </ul>
+ *
+ * @see ToolWindowPreference
+ * @see SettingsManager
+ * @see GlobalToolWindowManagerService
+ * @see ProjectToolWindowManagerService
+ * @see PreferredAvailabilitiesView
+ */
 public final class ToolWindowManagerDispatcher {
+
     private static final Key<ToolWindowManagerDispatcher> KEY = Key.create("ToolWindowManagerDispatcher");
     private static final SettingsMode DEFAULT_SETTINGS_MODE = SettingsMode.GLOBAL;
     private final Lock lock = new ReentrantLock();
@@ -38,6 +62,12 @@ public final class ToolWindowManagerDispatcher {
     private final Map<SettingsMode, SettingsManager> settingsManagerMap = new EnumMap<>(SettingsMode.class);
     private SettingsMode settingsMode;
 
+    /**
+     * Returns the singleton instance of ToolWindowManagerDispatcher for the given project.
+     *
+     * @param project The project instance for which the dispatcher is created or retrieved.
+     * @return An instance of ToolWindowManagerDispatcher.
+     */
     public static ToolWindowManagerDispatcher getInstance(@NotNull Project project) {
         ToolWindowManagerDispatcher dispatcher = project.getUserData(KEY);
         if (dispatcher == null) {
@@ -47,12 +77,21 @@ public final class ToolWindowManagerDispatcher {
         return dispatcher;
     }
 
+    /**
+     * Private constructor that initializes the dispatcher for the given project. This method also
+     * initializes the settings manager map and loads the current settings mode.
+     *
+     * @param project The project instance to associate with this dispatcher.
+     */
     private ToolWindowManagerDispatcher(@NotNull Project project) {
         this.project = project;
         initializeSettingsManagerMap();
         loadSettingsMode();
     }
 
+    /**
+     * Loads the current settings mode from the project settings.
+     */
     private void loadSettingsMode() {
         ToolWindowManagerSettings settings = project.getService(ToolWindowManagerSettings.class);
         SettingsMode savedMode = settings.getSettingsMode();
@@ -60,6 +99,9 @@ public final class ToolWindowManagerDispatcher {
         switchSettingsMode(this.settingsMode);
     }
 
+    /**
+     * Initializes the settings manager map with services for global and project-level tool window management.
+     */
     private void initializeSettingsManagerMap() {
         settingsManagerMap.putIfAbsent(SettingsMode.GLOBAL, ApplicationManager.getApplication().getService(GlobalToolWindowManagerService.class));
 
@@ -68,6 +110,9 @@ public final class ToolWindowManagerDispatcher {
         }
     }
 
+    /**
+     * Applies the current preferences to the tool windows, either by saving changes or reverting to defaults.
+     */
     public void apply() {
         lock.lock();
         try {
@@ -90,6 +135,11 @@ public final class ToolWindowManagerDispatcher {
         }
     }
 
+    /**
+     * Checks if any preferences have been modified.
+     *
+     * @return true if preferences have been modified; false otherwise.
+     */
     public boolean isModified() {
         PreferredAvailabilitiesView view = PreferredAvailabilitiesViewHolder.getInstance(project);
 
@@ -108,6 +158,9 @@ public final class ToolWindowManagerDispatcher {
                 });
     }
 
+    /**
+     * Resets the tool windows to their default preferences.
+     */
     public void reset() {
         lock.lock();
         try {
@@ -119,6 +172,11 @@ public final class ToolWindowManagerDispatcher {
         }
     }
 
+    /**
+     * Applies the given preferences to the current settings manager.
+     *
+     * @param preferences A map of tool window IDs and their corresponding preferences.
+     */
     public void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences) {
         lock.lock();
         try {
@@ -129,11 +187,19 @@ public final class ToolWindowManagerDispatcher {
         }
     }
 
+    /**
+     * Applies the current preferences to the tool windows.
+     */
     private void applyCurrentPreferences() {
         List<ToolWindowPreference> prefs = getCurrentPreferences();
         ToolWindowPreferenceApplier.getInstance(project).applyPreferencesFrom(prefs);
     }
 
+    /**
+     * Retrieves the available tool windows based on their current preferences.
+     *
+     * @return A list of available tool window preferences.
+     */
     public List<ToolWindowPreference> getAvailableToolWindows() {
         List<ToolWindowPreference> result = new ArrayList<>();
         ToolWindowManager manager = ToolWindowManager.getInstance(project);
@@ -153,36 +219,77 @@ public final class ToolWindowManagerDispatcher {
         return result;
     }
 
+    /**
+     * Retrieves the current settings mode (global or project-specific).
+     *
+     * @return The current settings mode.
+     */
     public SettingsMode getSettingsMode() {
         return settingsMode;
     }
 
+    /**
+     * Switches to a different settings mode (global or project-specific).
+     *
+     * @param settingsMode The new settings mode.
+     */
     public void switchSettingsMode(@NotNull SettingsMode settingsMode) {
         this.settingsMode = settingsMode;
         saveSettingsMode(settingsMode);
     }
 
+    /**
+     * Saves the current settings mode to the project settings.
+     *
+     * @param settingsMode The settings mode to save.
+     */
     private void saveSettingsMode(@NotNull SettingsMode settingsMode) {
         ToolWindowManagerSettings settings = project.getService(ToolWindowManagerSettings.class);
         settings.setSettingsMode(settingsMode);
     }
 
+    /**
+     * Retrieves the settings manager corresponding to the current settings mode.
+     *
+     * @return The current settings manager.
+     */
     public SettingsManager getCurrentSettingsManager() {
         return settingsManagerMap.get(settingsMode);
     }
 
+    /**
+     * Retrieves the current preferences for all tool windows.
+     *
+     * @return A list of tool window preferences.
+     */
     public List<ToolWindowPreference> getCurrentPreferences() {
         return new ArrayList<>(getCurrentSettingsManager().getPreferences().values());
     }
 
+    /**
+     * Retrieves the default preferences for all tool windows.
+     *
+     * @return A list of tool window preferences with default settings.
+     */
     public @NotNull List<ToolWindowPreference> getDefaultAvailabilityToolWindows() {
         return new ArrayList<>(getCurrentSettingsManager().getDefaultPreferences().values());
     }
 
+    /**
+     * Retrieves the default preference for a specific tool window.
+     *
+     * @param id The ID of the tool window.
+     * @return The default preference for the specified tool window.
+     */
     public ToolWindowPreference getDefaultAvailabilityToolWindow(@NotNull String id) {
         return getCurrentSettingsManager().getDefaultAvailabilityToolWindow(id);
     }
 
+    /**
+     * Initializes the default preferences for tool windows based on their current availability.
+     *
+     * @param project The project instance for which the preferences are initialized.
+     */
     public void initializeDefaultPreferences(Project project) {
         Map<String, ToolWindowPreference> defaultPreferences = new HashMap<>();
         ToolWindowManager manager = ToolWindowManager.getInstance(project);
