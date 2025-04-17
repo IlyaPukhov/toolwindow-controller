@@ -99,12 +99,10 @@ public final class ToolWindowManagerDispatcher {
 
             for (ToolWindowPreference pref : editedPrefs) {
                 ToolWindowPreference defaultPref = getCurrentSettingsManager().getDefaultAvailabilityToolWindow(pref.getId());
-                AvailabilityPreference defAvail = defaultPref == null
-                        ? AvailabilityPreference.UNAFFECTED
-                        : defaultPref.getAvailabilityPreference();
-
-                if (pref.getAvailabilityPreference() != defAvail && pref.getAvailabilityPreference() != AvailabilityPreference.UNAFFECTED) {
+                if (pref.getAvailabilityPreference() != AvailabilityPreference.UNAFFECTED) {
                     toSave.put(pref.getId(), pref);
+                } else {
+                    toSave.put(pref.getId(), defaultPref);
                 }
             }
 
