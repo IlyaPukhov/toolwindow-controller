@@ -3,25 +3,28 @@
     <name>ToolWindow Manager Advanced</name>
     <vendor email="dinamond2003@gmail.com">Ilya Pukhov</vendor>
     <description><![CDATA[
-    ### ✨ ToolWindow Manager Advanced
+<html>
+  <h2 style="margin-top:0;">🛠️ ToolWindow Manager Advanced</h2>
+  <p>Manage tool windows visibility globally or per project.</p>
 
-    Take control of your IDE's workspace with **hierarchical ToolWindow management**:
+  <ul>
+    <li>⚙️ Global defaults</li>
+    <li>📂 Project overrides</li>
+    <li>🔁 Auto-apply on startup</li>
+  </ul>
 
-    | Level        | Capabilities                          |
-    |--------------|---------------------------------------|
-    | **Global**   | Set default visibility for all projects |
-    | **Project**  | Override defaults when needed          |
+  <p><b>Use cases:</b> clean setups, fast onboarding, workflow switching.</p>
+  <p><b>📥 One-time setup — flexible forever.</b></p>
+</html>
+]]></description>
 
-    💡 **Perfect for**:
-    - Teams sharing styleguides but needing project flexibility
-    - Developers working with different tech stacks
-    - Anyone wanting cleaner IDE interface
-  ]]></description>
     <depends>com.intellij.modules.platform</depends>
 
-    <extensions defaultExtensionNs="com.intellij" />
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="com.puhovin.intellijplugin.twm.initialization.ResetToolWindowsToDefaultsOnStartup" />
+    </extensions>
 
-    <resource-bundle>com.puhovin.intellijplugin.twm.ToolWindowManagerBundle</resource-bundle>
+    <resource-bundle>com.puhovin.intellijplugin.twm.bundle</resource-bundle>
 
     <actions>
         <group id="ToolWindowManagerActionGroup"
@@ -33,7 +36,7 @@
                     class="com.puhovin.intellijplugin.twm.action.ApplyPreferredAvailabilitiesAction" />
             <action id="ApplyDefaultAvailabilitiesAction"
                     class="com.puhovin.intellijplugin.twm.action.ApplyDefaultAvailabilitiesAction" />
-            <add-to-group group-id="WindowMenu" anchor="after" relative-to-action="ToolWindowsGroup" />
+            <add-to-group group-id="ToolsMenu" anchor="last" />
         </group>
     </actions>
 

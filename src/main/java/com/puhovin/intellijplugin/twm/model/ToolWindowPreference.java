@@ -1,89 +1,61 @@
-/*
- * Copyright 2007 Mark Scott
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.puhovin.intellijplugin.twm.model;
 
+import com.intellij.util.xmlb.Converter;
+import com.intellij.util.xmlb.annotations.Attribute;
+import com.intellij.util.xmlb.annotations.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 
-/**
- * @author Mark Scott
- * @version $Id: ToolWindowPreference.java 31 2007-06-01 23:01:54Z mark $
- */
-public class ToolWindowPreference implements Comparable<ToolWindowPreference>, Serializable {
-	private String id = "";
-	private AvailabilityPreference availabilityPreference = AvailabilityPreference.UNAFFECTED;
+@Tag("toolwindow")
+public class ToolWindowPreference implements Serializable {
 
-	public ToolWindowPreference() {
-	}
+    @Attribute("id")
+    private String id;
 
-	public ToolWindowPreference(@NotNull final String id, @NotNull AvailabilityPreference availabilityPreference) {
-		this.id = id;
-		this.availabilityPreference = availabilityPreference;
-	}
+    @Attribute(value = "preference", converter = AvailabilityPreferenceConverter.class)
+    private AvailabilityPreference availabilityPreference;
 
-	@NotNull
-	public String getId() {
-		return id;
-	}
+    public ToolWindowPreference() {}
 
-	public @NotNull AvailabilityPreference getAvailabilityPreference() {
-		return availabilityPreference;
-	}
+    public ToolWindowPreference(String id, AvailabilityPreference availabilityPreference) {
+        this.id = id;
+        this.availabilityPreference = availabilityPreference;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setAvailabilityPreference(AvailabilityPreference availabilityPreference) {
-		this.availabilityPreference = availabilityPreference;
-	}
+    public AvailabilityPreference getAvailabilityPreference() {
+        return availabilityPreference;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
 
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
+        ToolWindowPreference that = (ToolWindowPreference) o;
+        return id.equals(that.id) && availabilityPreference == that.availabilityPreference;
+    }
 
-		ToolWindowPreference that = (ToolWindowPreference) obj;
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + availabilityPreference.hashCode();
+        return result;
+    }
 
-		if (availabilityPreference != that.availabilityPreference) {
-			return false;
-		}
+    public static class AvailabilityPreferenceConverter extends Converter<AvailabilityPreference> {
 
-		return id.equals(that.id);
-	}
+        @Override
+        public AvailabilityPreference fromString(@NotNull String value) {
+            return AvailabilityPreference.valueOf(value);
+        }
 
-	@Override
-	public int hashCode() {
-		int result = id.hashCode();
-		result = 31 * result + availabilityPreference.hashCode();
-
-		return result;
-	}
-
-	public int compareTo(ToolWindowPreference o) {
-		if (o == null) {
-			throw new NullPointerException("Cannot compare to null");
-		}
-
-		return id.compareTo(o.id);
-	}
+        @Override
+        public String toString(AvailabilityPreference value) {
+            return value.name();
+        }
+    }
 }

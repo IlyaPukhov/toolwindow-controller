@@ -1,42 +1,73 @@
-name: Build Plugin
+name: Build and Release Plugin
 
 on:
   push:
-    branches: [ master ]
-
-env:
-  COMMIT_SHORT: $(git rev-parse --short ${{ github.sha }})
+    branches: [ releases/** ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      commit_short: ${{ steps.vars.outputs.COMMIT_SHORT }}
+      version: ${{ steps.extract_version.outputs.VERSION }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.1.7
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4.2.2
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'gradle'
+          cache: gradle
 
-      - name: Build plugin with Gradle
-        run: ./gradlew buildPlugin
-
-      - name: Install GitHub CLI
-        run: sudo apt-get update && sudo apt-get install -y gh
-
-      - name: Authenticate GitHub CLI
-        run: gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create release with commit hash
+      - name: Build plugin
         run: |
-          gh release create "build-$COMMIT_SHORT" \
-            ./build/distributions/*.zip \
-            --title "Build $COMMIT_SHORT ($(date +'%Y-%m-%d'))" \
-            --notes "Automatic build from commit ${{ github.sha }}"
+          chmod +x gradlew
+          ./gradlew buildPlugin
 
-      - name: Show release URL
+      - name: Extract version
+        id: extract_version
         run: |
-          echo "Release created: https://github.com/${{ github.repository }}/releases/tag/build-$COMMIT_SHORT"
+          VERSION=$(./gradlew -q printVersion)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get short commit hash
+        id: vars
+        run: |
+          COMMIT_SHORT=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT=$COMMIT_SHORT" >> $GITHUB_OUTPUT
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-artifacts
+          path: build/distributions/*.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download plugin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin-artifacts
+
+      - name: Prepare release metadata
+        run: |
+          echo "RELEASE_DATE=$(date +'%d.%m.%Y')" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: Create and upload GitHub Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: build-${{ needs.build.outputs.commit_short }}
+          name: Release v${{ needs.build.outputs.version }}-${{ needs.build.outputs.commit_short }}
+          body: |
+            Automatic build from commit ${{ github.sha }} (built on ${{ env.RELEASE_DATE }})
+            Branch: ${{ env.BRANCH_NAME }}
+          files: |
+            *.zip

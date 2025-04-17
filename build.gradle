@@ -1,44 +1,56 @@
 plugins {
-  id 'java'
-  id 'org.jetbrains.intellij' version '1.17.4'
+    id 'java'
+    id 'org.jetbrains.intellij.platform' version '2.5.0'
 }
 
-group 'com.puhovin.intellijplugin'
-version '1.0'
+group = 'com.puhovin.intellijplugin'
+version = '1.0.0'
 
 repositories {
-  mavenCentral()
+    mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        intellijIdeaCommunity '2024.2.1'
+    }
 }
 
 java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(21)
-  }
-}
-
-intellij {
-  pluginName = 'intellij-plugin-twm'
-  version = '2023.2.1'
-  plugins = []
-  type = 'IC'
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 tasks {
-  patchPluginXml {
-    sinceBuild.set("232")
-  }
+    patchPluginXml {
+        pluginName = 'ToolWindow Manager'
+        sinceBuild = '242'
+        untilBuild = '999.*'
+    }
 
-  signPlugin {
-    certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-    privateKey.set(System.getenv("PRIVATE_KEY"))
-    password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
-  }
+    signPlugin {
+        certificateChain = System.getenv("CERTIFICATE_CHAIN")
+        privateKey = System.getenv("PRIVATE_KEY")
+        password = System.getenv("PRIVATE_KEY_PASSWORD")
+    }
 
-  publishPlugin {
-    token.set(System.getenv("PUBLISH_TOKEN"))
-  }
+    publishPlugin {
+        token = System.getenv("PUBLISH_TOKEN")
+    }
 }
 
 wrapper {
-  gradleVersion = '8.12'
+    gradleVersion = '8.12'
+}
+
+def pluginVersion = project.version
+tasks.register('printVersion') {
+    doLast {
+        println pluginVersion
+    }
 }
