@@ -15,7 +15,7 @@ etc., and ensures they automatically show or hide depending on the project.
 - Automatically restores visibility states on project open
 - Includes "Reset to Defaults" option
 
----
+
 
 ## 🧾 Notes
 
@@ -27,7 +27,6 @@ etc., and ensures they automatically show or hide depending on the project.
 - On *macOS*: `~/Library/Application Support/JetBrains/IntelliJIdea<version>/options`
 - On *Linux*: `~/.config/JetBrains/IntelliJIdea<version>/options`
 
----
 
 ## 🧭 Usage
 
@@ -57,7 +56,7 @@ To access the configuration:
     - Select the downloaded `.zip` file
 3. Restart the IDE if prompted
 
----
+
 
 ### 🧪 Method 2: Build from Source
 
