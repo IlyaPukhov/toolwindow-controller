@@ -4,9 +4,7 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractSettingsManager implements SettingsManager {
@@ -38,11 +36,6 @@ public abstract class AbstractSettingsManager implements SettingsManager {
     @Override
     public void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences) {
         this.state.setPreferences(preferences);
-    }
-
-    @Override
-    public @NotNull List<ToolWindowPreference> getPreferredAvailabilityToolWindows() {
-        return new ArrayList<>(state.getPreferences().values());
     }
 
     @Override

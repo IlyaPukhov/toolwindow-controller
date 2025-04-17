@@ -118,19 +118,15 @@ public final class ToolWindowManagerDispatcher {
 
 
     private void applyCurrentPreferences() {
-        List<ToolWindowPreference> prefs = new ArrayList<>(getCurrentSettingsManager().getState().getPreferences().values());
+        List<ToolWindowPreference> prefs = getCurrentPreferences();
         new ToolWindowPreferenceApplier(project, this).applyPreferencesFrom(prefs);
-    }
-
-    public List<ToolWindowPreference> getPreferredAvailabilityToolWindows() {
-        return getCurrentSettingsManager().getPreferredAvailabilityToolWindows();
     }
 
     public boolean isModified() {
         if (configurationComponent == null) return false;
 
         Map<String, AvailabilityPreference> currentPrefs = new HashMap<>();
-        getCurrentSettingsManager().getState().getPreferences().values().forEach(pref ->
+        getCurrentPreferences().forEach(pref ->
                 currentPrefs.put(pref.getId(), pref.getAvailabilityPreference())
         );
 
@@ -185,6 +181,10 @@ public final class ToolWindowManagerDispatcher {
         } finally {
             lock.unlock();
         }
+    }
+
+    public List<ToolWindowPreference> getCurrentPreferences() {
+        return new ArrayList<>(getCurrentSettingsManager().getState().getPreferences().values());
     }
 
     public @NotNull List<ToolWindowPreference> getDefaultAvailabilityToolWindows() {

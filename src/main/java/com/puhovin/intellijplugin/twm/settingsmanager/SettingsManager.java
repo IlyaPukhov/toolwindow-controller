@@ -5,7 +5,6 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Map;
 
 public interface SettingsManager extends PersistentStateComponent<ToolWindowPreferenceStore> {
@@ -21,8 +20,6 @@ public interface SettingsManager extends PersistentStateComponent<ToolWindowPref
     Map<String, ToolWindowPreference> getDefaultPreferences();
 
     void setDefaultPreferences(@NotNull Map<String, ToolWindowPreference> preferences);
-
-    @NotNull List<ToolWindowPreference> getPreferredAvailabilityToolWindows();
 
     ToolWindowPreference getDefaultAvailabilityToolWindow(String id);
 }
