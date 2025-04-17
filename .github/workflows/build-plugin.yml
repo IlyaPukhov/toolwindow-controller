@@ -1,59 +1,62 @@
-  name: Build Plugin
+name: Build and Release Plugin
 
-  on:
-    push:
-      branches: [ master ]
-    workflow_dispatch:
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
 
-  jobs:
-    build:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4.1.7
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      commit_short: ${{ steps.vars.outputs.COMMIT_SHORT }}
+      version: ${{ steps.extract_version.outputs.VERSION }}
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Set up JDK 21
-          uses: actions/setup-java@v4.2.2
-          with:
-            java-version: '21'
-            distribution: 'temurin'
-            cache: 'gradle'
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
 
-        - name: Build plugin with Gradle
-          run: |
-            chmod +x gradlew
-            ./gradlew buildPlugin
+      - name: Build plugin
+        run: |
+          chmod +x gradlew
+          ./gradlew buildPlugin
 
-        - name: Extract version
-          id: extract_version
-          run: |
-            VERSION=$(./gradlew -q properties \
-              | grep '^version:' \
-              | awk '{print $2}')
-            echo "VERSION=${VERSION}" >> $GITHUB_ENV
+      - name: Extract version
+        run: |
+          echo "::set-output name=VERSION::$(./gradlew -q properties \
+            | grep '^version:' | awk '{print $2}')"
 
-        - name: Get short commit hash
-          id: vars
-          run: echo "COMMIT_SHORT=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
+      - name: Get short commit hash
+        run: |
+          echo "::set-output name=COMMIT_SHORT::$(git rev-parse --short ${{ github.sha }})"
 
-        - name: Install GitHub CLI
-          run: sudo apt-get update && sudo apt-get install -y gh
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare release metadata
+        run: |
+          echo "RELEASE_DATE=$(date +'%d.%m.%Y %H:%M:%S')" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
-        - name: Authenticate GitHub CLI
-          run: gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
+      - name: Create and upload GitHub Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: build-${{ needs.build.outputs.commit_short }}
+          name: Release ${{ needs.build.outputs.version }}-${{ needs.build.outputs.commit_short }} (built on ${{ env.RELEASE_DATE }})
+          body: |
+            Automatic build from commit ${{ github.sha }}
+            Branch: ${{ env.BRANCH_NAME }}
+          files: |
+            build/distributions/*.zip
 
-        - name: Create and upload GitHub Release
-          uses: softprops/action-gh-release@v2.2.1
-          with:
-            tag_name: build-${{ env.COMMIT_SHORT }}
-            name: Release ${{ env.VERSION }}-${{ env.COMMIT_SHORT }} (built on ${{ github.event.head_commit.timestamp }})
-            body: |
-              Automatic build from commit ${{ github.sha }}
-            files: |
-              build/distributions/*.zip
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-        - name: Show release URL
-          run: |
-            echo "Release created: https://github.com/${{ github.repository }}/releases/tag/build-$COMMIT_SHORT"
+      - name: Show release URL
+        run: |
+          echo "Release created: https://github.com/${{ github.repository }}/releases/tag/build-${{ needs.build.outputs.commit_short }}"
