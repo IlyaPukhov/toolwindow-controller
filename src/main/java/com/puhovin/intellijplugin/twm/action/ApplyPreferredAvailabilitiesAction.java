@@ -11,6 +11,6 @@ public class ApplyPreferredAvailabilitiesAction extends AbstractApplyAvailabilit
     @Override
     @NotNull
     protected List<ToolWindowPreference> getPreferencesToApply(@NotNull ToolWindowManagerDispatcher dispatcher) {
-        return dispatcher.getCurrentPreferences();
+        return dispatcher.getCurrentAvailabilityToolWindows();
     }
 }

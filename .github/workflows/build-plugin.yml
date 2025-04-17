@@ -12,7 +12,8 @@ jobs:
       commit_short: ${{ steps.vars.outputs.COMMIT_SHORT }}
       version: ${{ steps.extract_version.outputs.VERSION }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -53,9 +54,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: build-${{ needs.build.outputs.commit_short }}
-          name: Release ${{ needs.build.outputs.version }}-${{ needs.build.outputs.commit_short }} (built on ${{ env.RELEASE_DATE }})
+          name: Release v${{ needs.build.outputs.version }}-${{ needs.build.outputs.commit_short }}
           body: |
-            Automatic build from commit ${{ github.sha }}
+            Automatic build from commit ${{ github.sha }} (built on ${{ env.RELEASE_DATE }})
             Branch: ${{ env.BRANCH_NAME }}
           files: |
             build/distributions/*.zip

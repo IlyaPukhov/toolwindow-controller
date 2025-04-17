@@ -11,7 +11,7 @@ import java.util.ResourceBundle;
 public final class ToolWindowManagerBundle {
 
     @NonNls
-    private static final String BUNDLE = "com.puhovin.intellijplugin.twm.ToolWindowManagerBundle";
+    private static final String BUNDLE = "com.puhovin.intellijplugin.twm.bundle";
     private static Reference<ResourceBundle> ourBundle = null;
 
     private ToolWindowManagerBundle() {}

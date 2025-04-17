@@ -144,7 +144,7 @@ public final class ToolWindowManagerDispatcher {
         PreferredAvailabilitiesView view = PreferredAvailabilitiesViewHolder.getInstance(project);
 
         Map<String, AvailabilityPreference> currentPrefs = new HashMap<>();
-        getCurrentPreferences().forEach(pref ->
+        getCurrentAvailabilityToolWindows().forEach(pref ->
                 currentPrefs.put(pref.getId(), pref.getAvailabilityPreference())
         );
 
@@ -191,7 +191,7 @@ public final class ToolWindowManagerDispatcher {
      * Applies the current preferences to the tool windows.
      */
     private void applyCurrentPreferences() {
-        List<ToolWindowPreference> prefs = getCurrentPreferences();
+        List<ToolWindowPreference> prefs = getCurrentAvailabilityToolWindows();
         ToolWindowPreferenceApplier.getInstance(project).applyPreferencesFrom(prefs);
     }
 
@@ -262,7 +262,7 @@ public final class ToolWindowManagerDispatcher {
      *
      * @return A list of tool window preferences.
      */
-    public List<ToolWindowPreference> getCurrentPreferences() {
+    public List<ToolWindowPreference> getCurrentAvailabilityToolWindows() {
         return new ArrayList<>(getCurrentSettingsManager().getPreferences().values());
     }
 
