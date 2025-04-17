@@ -2,6 +2,7 @@ package com.puhovin.intellijplugin.twm;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
+import com.puhovin.intellijplugin.twm.model.SettingsMode;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import com.puhovin.intellijplugin.twm.table.AvailabilityPreferenceJTable;
 import com.puhovin.intellijplugin.twm.table.AvailabilityPreferenceTableModel;
@@ -14,32 +15,29 @@ import java.awt.FlowLayout;
 import java.util.List;
 
 public class PreferredAvailabilitiesView extends JPanel {
-    private final transient Project project;
     private final AvailabilityPreferenceJTable table;
+    private final transient ToolWindowManagerDispatcher dispatcher;
 
-    public PreferredAvailabilitiesView(Project project) {
+    public PreferredAvailabilitiesView(@NotNull Project project, @NotNull ToolWindowManagerDispatcher dispatcher) {
         super(new BorderLayout());
-        this.project = project;
+        this.dispatcher = dispatcher;
 
-        ToolWindowManagerService service = project.getService(ToolWindowManagerService.class);
-
-        JPanel topPanel = initializePanel(service);
+        JPanel topPanel = initializePanel();
         add(topPanel, BorderLayout.NORTH);
 
         table = new AvailabilityPreferenceJTable(project, new AvailabilityPreferenceTableModel());
         add(new JBScrollPane(table), BorderLayout.CENTER);
 
-        populateTableModel();
+        populateTableModel(dispatcher.getAvailableToolWindows());
     }
 
-    private @NotNull JPanel initializePanel(ToolWindowManagerService service) {
+    private @NotNull JPanel initializePanel() {
         JCheckBox globalModeCheckbox = new JCheckBox("Use global settings");
-        globalModeCheckbox.setSelected(service.isUsingGlobalSettings());
-        globalModeCheckbox.setFocusPainted(false);
+        globalModeCheckbox.setSelected(dispatcher.getSettingsMode().getValue());
         globalModeCheckbox.addActionListener(e -> {
             boolean useGlobal = globalModeCheckbox.isSelected();
-            service.setUseGlobalSettings(useGlobal);
-            populateTableModel();
+            dispatcher.switchSettingsMode(SettingsMode.fromBoolean(useGlobal));
+            populateTableModel(dispatcher.getAvailableToolWindows());
         });
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -47,13 +45,9 @@ public class PreferredAvailabilitiesView extends JPanel {
         return topPanel;
     }
 
-    private void populateTableModel() {
+    private void populateTableModel(List<ToolWindowPreference> preferences) {
         AvailabilityPreferenceTableModel model = (AvailabilityPreferenceTableModel) table.getModel();
-        model.removeToolWindowPreferences();
-
-        project.getService(ToolWindowManagerService.class)
-                .getAvailableToolWindows()
-                .forEach(model::addToolWindowPreference);
+        model.setToolWindowPreferences(preferences);
     }
 
     @NotNull
@@ -61,7 +55,7 @@ public class PreferredAvailabilitiesView extends JPanel {
         return ((AvailabilityPreferenceTableModel) table.getModel()).getToolWindowPreferences();
     }
 
-    public void reset() {
-        populateTableModel();
+    public void reset(@NotNull List<ToolWindowPreference> defaultPreferences) {
+        populateTableModel(defaultPreferences);
     }
 }

@@ -32,6 +32,7 @@ public class AvailabilityPreferenceJTable extends JBTable {
         setAutoCreateRowSorter(true);
         setRowHeight((int) (UIUtil.getLabelFont().getSize() * 1.8));
         getRowSorter().toggleSortOrder(0);
+        createDefaultColumnsFromModel();
     }
 
     @Override

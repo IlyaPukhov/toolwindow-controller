@@ -12,7 +12,7 @@ public enum AvailabilityPreference implements Serializable {
 
 	private final String text;
 
-	AvailabilityPreference(@NotNull final String text) {
+	AvailabilityPreference(@NotNull String text) {
 		this.text = text;
 	}
 
