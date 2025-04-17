@@ -27,13 +27,16 @@ jobs:
           ./gradlew buildPlugin
 
       - name: Extract version
+        id: extract_version
         run: |
-          echo "::set-output name=VERSION::$(./gradlew -q properties \
-            | grep '^version:' | awk '{print $2}')"
+          VERSION=$(./gradlew -q properties | grep '^version:' | awk '{print $2}')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Get short commit hash
+        id: vars
         run: |
-          echo "::set-output name=COMMIT_SHORT::$(git rev-parse --short ${{ github.sha }})"
+          COMMIT_SHORT=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT=$COMMIT_SHORT" >> $GITHUB_OUTPUT
 
   release:
     needs: build
@@ -41,7 +44,7 @@ jobs:
     steps:
       - name: Prepare release metadata
         run: |
-          echo "RELEASE_DATE=$(date +'%d.%m.%Y %H:%M:%S')" >> $GITHUB_ENV
+          echo "RELEASE_DATE=$(date +'%d.%m.%Y')" >> $GITHUB_ENV
           echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Create and upload GitHub Release

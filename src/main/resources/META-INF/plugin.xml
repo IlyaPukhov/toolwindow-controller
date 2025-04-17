@@ -2,28 +2,39 @@
     <id>com.puhovin.intellijplugin.twm</id>
     <name>ToolWindow Manager Advanced</name>
     <vendor email="dinamond2003@gmail.com">Ilya Pukhov</vendor>
-    <description>
-        <![CDATA[
-        <html>
-        <h2>✨ ToolWindow Manager Advanced</h2>
-        <p>Take control of your IDE's workspace with <b>hierarchical ToolWindow management</b>:</p>
+    <description><![CDATA[
+<html>
+<h2>🛠️ ToolWindow Manager Advanced</h2>
 
-        <table border="1">
-        <tr><th>Level</th><th>Capabilities</th></tr>
-        <tr><td><b>Global</b></td><td>Set default visibility for all projects</td></tr>
-        <tr><td><b>Project</b></td><td>Override defaults when needed</td></tr>
-        </table>
+<p>Revolutionize your IDE workspace with multi-level ToolWindow configuration. Easily manage visibility of tool windows at global and project levels.</p>
 
-        <br/>
-        <p>💡 <b>Perfect for</b>:</p>
-        <ul>
-        <li>Teams sharing styleguides but needing project flexibility</li>
-        <li>Developers working with different tech stacks</li>
-        <li>Anyone wanting cleaner IDE interface</li>
-        </ul>
-        </html>
-        ]]>
-    </description>
+<h3>🌟 Key Features</h3>
+<ul>
+  <li>⚙️ Global default configurations</li>
+  <li>🎯 Project-specific overrides</li>
+  <li>🔁 Automatic settings application</li>
+</ul>
+
+<h3>📊 Hierarchical Management</h3>
+<p><b>🌍 Global Level:</b> Set defaults for the entire IDE instance.<br/>
+<b>📂 Project Level:</b> Customize tool window visibility per project needs.</p>
+
+<h3>🚀 Benefits</h3>
+<ul>
+  <li><b>For Teams:</b> Maintain consistency, reduce onboarding time, enforce best practices</li>
+  <li><b>For Developers:</b> Switch setups fast, enjoy cleaner workspace, personalize workflow</li>
+</ul>
+
+<h3>💡 Usage Examples</h3>
+<ol>
+  <li>New Project Setup: Apply tech stack profile</li>
+  <li>Code Review: Enable analysis tools</li>
+  <li>Debugging: Activate monitoring panels</li>
+</ol>
+
+<p><b>📥 Install once — customize infinitely!</b></p>
+</html>
+]]></description>
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">

@@ -1,28 +1,63 @@
-# ToolWindow Manager Advanced for IntelliJ IDEA
+# 🔧 ToolWindow Manager Advanced for IntelliJ IDEA
 
-***Rework of [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager) plugin for IntelliJ IDEA
-2024.2+***
+**A modern rework of the original [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager)  
+Compatible with IntelliJ IDEA 2024.2+**
 
-Plugin allows you to set visibility preferences to known Tool Windows like
-*Bookmarks*, *Notifications* etc. and automatically show or hide them for
-each project.
+This plugin allows you to configure visibility preferences for known tool windows such as *Bookmarks*, *Notifications*,
+etc., and ensures they automatically show or hide depending on the project.
 
-![image info](screen.png)
+To access the configuration:
 
-### How to build / run / install plugin
+- Open `Tools` → `Tool Window Management` → `Configure Preferred Availabilities`
 
-If you open the project in Intellij IDEA, it will be recognized as IDE plugin. **Gradle (>=8.12)** is used to build the
-plugin and manage its dependencies. If necessary, you can build plugin from sources using command:
+<p align="center">
+  <img src="images/menu.png" alt="Menu screenshot" width="400"/>
+</p>
 
-```shell script
-./gradlew clean buildPlugin
-``` 
+<p align="center">
+  <img src="images/preferences.png" alt="Preferences screenshot" width="700"/>
+</p>
 
-It will produce packaged zip file at:
+---
 
-```
-build/distributions/toolwindow-manager-advanced-{version}.zip
-```
+## 🛠️ Installation
 
-and it can be later manually installed into Intellij IDEA using its *Settings... -> Plugins -> Cog icon on top ->
-Install Plugin from Disk...* option.
+### ✅ Method 1: Pre-built Package (Recommended)
+
+1. Download the latest release from
+   the [Releases section](https://github.com/IlyaPukhov/toolwindow-manager-advanced/releases)
+2. Install the plugin in IntelliJ IDEA:
+    - Go to `Settings` → `Plugins`
+    - Click the ⚙️ icon (gear) → `Install Plugin from Disk...`
+    - Select the downloaded `.zip` file
+3. Restart the IDE if prompted
+
+---
+
+### 🧪 Method 2: Build from Source
+
+If you want to build the plugin yourself:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/IlyaPukhov/toolwindow-manager-advanced.git
+   cd toolwindow-manager-advanced
+   ```
+
+2. Open the project in IntelliJ IDEA — it will be automatically recognized as a plugin project
+
+3. Build the plugin using the following command:
+   ```bash
+   ./gradlew clean buildPlugin
+   ```
+
+4. The packaged plugin will be located at:
+   ```
+   build/distributions/toolwindow-manager-advanced-{version}.zip
+   ```
+
+5. Install the plugin in IntelliJ IDEA:
+    - Go to `Settings` → `Plugins`
+    - Click the ⚙️ icon → `Install Plugin from Disk...`
+    - Select the generated `.zip` file
+6. Restart the IDE if prompted
