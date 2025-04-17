@@ -53,7 +53,7 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
 
             @Override
             public void reset() {
-                dispatcher.resetToDefaultPreferences();
+                dispatcher.reset();
             }
 
             @Override

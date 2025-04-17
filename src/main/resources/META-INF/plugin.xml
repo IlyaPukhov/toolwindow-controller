@@ -14,6 +14,7 @@
         <tr><td><b>Project</b></td><td>Override defaults when needed</td></tr>
         </table>
 
+        <br/>
         <p>💡 <b>Perfect for</b>:</p>
         <ul>
         <li>Teams sharing styleguides but needing project flexibility</li>
@@ -26,7 +27,7 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <postStartupActivity implementation="com.puhovin.intellijplugin.twm.ApplyToolWindowPreferencesOnStartup" />
+        <postStartupActivity implementation="com.puhovin.intellijplugin.twm.ResetToolWindowsToDefaultsOnStartup" />
     </extensions>
 
     <resource-bundle>com.puhovin.intellijplugin.twm.ToolWindowManagerBundle</resource-bundle>

@@ -45,7 +45,6 @@ public final class ToolWindowManagerDispatcher {
         this.project = project;
         initializeSettingsManagerMap();
         loadSettingsMode();
-        initializeDefaultPreferences(project);
     }
 
     private void loadSettingsMode() {
@@ -170,7 +169,7 @@ public final class ToolWindowManagerDispatcher {
         configurationComponent = null;
     }
 
-    public void resetToDefaultPreferences() {
+    public void reset() {
         lock.lock();
         try {
             applyCurrentPreferences();

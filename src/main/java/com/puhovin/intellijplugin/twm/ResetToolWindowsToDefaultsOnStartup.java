@@ -8,12 +8,15 @@ import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ApplyToolWindowPreferencesOnStartup implements ProjectActivity {
+public class ResetToolWindowsToDefaultsOnStartup implements ProjectActivity {
 
     @Override
     public @Nullable Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
-        StartupManager.getInstance(project).runAfterOpened(() ->
-                ToolWindowManagerDispatcher.getInstance(project).resetToDefaultPreferences()
+        StartupManager.getInstance(project).runAfterOpened(() -> {
+                    ToolWindowManagerDispatcher dispatcher = ToolWindowManagerDispatcher.getInstance(project);
+                    dispatcher.initializeDefaultPreferences(project);
+                    dispatcher.reset();
+                }
         );
         return Unit.INSTANCE;
     }
