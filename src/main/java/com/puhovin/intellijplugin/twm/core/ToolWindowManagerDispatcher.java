@@ -104,10 +104,7 @@ public final class ToolWindowManagerDispatcher {
      */
     private void initializeSettingsManagerMap() {
         settingsManagerMap.putIfAbsent(SettingsMode.GLOBAL, ApplicationManager.getApplication().getService(GlobalToolWindowManagerService.class));
-
-        if (project != null) {
-            settingsManagerMap.putIfAbsent(SettingsMode.PROJECT, project.getService(ProjectToolWindowManagerService.class));
-        }
+        settingsManagerMap.putIfAbsent(SettingsMode.PROJECT, project.getService(ProjectToolWindowManagerService.class));
     }
 
     /**

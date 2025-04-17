@@ -47,3 +47,10 @@ tasks {
 wrapper {
     gradleVersion = '8.12'
 }
+
+def pluginVersion = project.version
+tasks.register('printVersion') {
+    doLast {
+        println pluginVersion
+    }
+}

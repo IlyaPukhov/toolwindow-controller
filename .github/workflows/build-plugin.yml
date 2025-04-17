@@ -2,7 +2,7 @@ name: Build and Release Plugin
 
 on:
   push:
-    branches: [ master ]
+    branches: [ releases/** ]
   workflow_dispatch:
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
       - name: Extract version
         id: extract_version
         run: |
-          VERSION=$(./gradlew -q properties | grep '^version:' | awk '{print $2}')
+          VERSION=$(./gradlew -q printVersion)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Get short commit hash
@@ -39,10 +39,21 @@ jobs:
           COMMIT_SHORT=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT=$COMMIT_SHORT" >> $GITHUB_OUTPUT
 
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-artifacts
+          path: build/distributions/*.zip
+
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Download plugin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin-artifacts
+
       - name: Prepare release metadata
         run: |
           echo "RELEASE_DATE=$(date +'%d.%m.%Y')" >> $GITHUB_ENV
@@ -59,8 +70,4 @@ jobs:
             Automatic build from commit ${{ github.sha }} (built on ${{ env.RELEASE_DATE }})
             Branch: ${{ env.BRANCH_NAME }}
           files: |
-            build/distributions/*.zip
-
-      - name: Show release URL
-        run: |
-          echo "Release created: https://github.com/${{ github.repository }}/releases/tag/build-${{ needs.build.outputs.commit_short }}"
+            *.zip
