@@ -14,12 +14,12 @@ data class ToolWindowPreferenceStore(
         preferences.clear()
         preferencesMap.forEach { (id, pref) ->
             pref?.let {
-                preferences.add(ToolWindowPreference(id, it.availabilityPreference))
+                preferences.add(ToolWindowPreference(id, it.availabilityPreference!!))
             }
         }
     }
 
     fun getPreferences(): Map<String, ToolWindowPreference> {
-        return preferences.associateBy { it.id }
+        return preferences.associateBy { it.id!! }
     }
 }

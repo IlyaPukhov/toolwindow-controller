@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock
 class ToolWindowManagerDispatcher(private val project: Project) {
     private val lock: Lock = ReentrantLock()
     private val settingsManagerMap: MutableMap<SettingsMode, SettingsManager> = EnumMap(SettingsMode::class.java)
-    private var _settingsMode: SettingsMode = DEFAULT_SETTINGS_MODE
+    private lateinit var _settingsMode: SettingsMode
 
     val settingsMode: SettingsMode
         get() = _settingsMode
@@ -49,7 +49,6 @@ class ToolWindowManagerDispatcher(private val project: Project) {
 
     companion object {
         private val KEY = Key.create<ToolWindowManagerDispatcher>("ToolWindowManagerDispatcher")
-        private val DEFAULT_SETTINGS_MODE = SettingsMode.GLOBAL
 
         /**
          * Returns the singleton instance of ToolWindowManagerDispatcher for the given project.
@@ -69,7 +68,7 @@ class ToolWindowManagerDispatcher(private val project: Project) {
      */
     private fun loadSettingsMode() {
         val settings = project.getService(ToolWindowManagerSettings::class.java)
-        _settingsMode = settings.getSettingsMode() ?: DEFAULT_SETTINGS_MODE
+        _settingsMode = settings.getSettingsMode()
         switchSettingsMode(settingsMode)
     }
 
@@ -90,14 +89,7 @@ class ToolWindowManagerDispatcher(private val project: Project) {
         try {
             val view = PreferredAvailabilitiesViewHolder.getInstance(project)
             val editedPrefs = view.getCurrentViewState()
-            val toSave = mutableMapOf<String, ToolWindowPreference?>()
-
-            editedPrefs.forEach { pref ->
-                val defaultPref = getCurrentSettingsManager().getDefaultAvailabilityToolWindow(pref.id)
-                toSave[pref.id!!] = if (pref.availabilityPreference != UNAFFECTED) pref else defaultPref
-            }
-
-            applyPreferences(toSave)
+            applyPreferences(editedPrefs)
         } finally {
             lock.unlock()
         }
@@ -136,10 +128,15 @@ class ToolWindowManagerDispatcher(private val project: Project) {
      *
      * @param preferences A map of tool window IDs and their corresponding preferences.
      */
-    fun applyPreferences(preferences: Map<String, ToolWindowPreference?>) {
+    fun applyPreferences(preferences: List<ToolWindowPreference>) {
         lock.lock()
         try {
-            getCurrentSettingsManager().setPreferences(preferences)
+            val toSave = mutableMapOf<String, ToolWindowPreference?>()
+            preferences.forEach { pref ->
+                val defaultPref = getCurrentSettingsManager().getDefaultAvailabilityToolWindow(pref.id)
+                toSave[pref.id!!] = if (pref.availabilityPreference != UNAFFECTED) pref else defaultPref
+            }
+            getCurrentSettingsManager().setPreferences(toSave)
             applyCurrentPreferences()
         } finally {
             lock.unlock()
@@ -239,7 +236,7 @@ class ToolWindowManagerDispatcher(private val project: Project) {
     /**
      * Initializes the default preferences for tool windows based on their current availability.
      *
-     * @param project The project instance for which the preferences are initialized.
+     * @param project The project for which the default preferences are initialized.
      */
     fun initializeDefaultPreferences(project: Project) {
         val defaultPreferences = mutableMapOf<String, ToolWindowPreference>()

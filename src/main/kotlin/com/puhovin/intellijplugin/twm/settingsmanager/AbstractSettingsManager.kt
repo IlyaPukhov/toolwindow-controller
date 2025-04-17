@@ -28,8 +28,8 @@ abstract class AbstractSettingsManager : SettingsManager {
         return defaultPreferences
     }
 
-    override fun setDefaultPreferences(defaultPreferences: Map<String, ToolWindowPreference>) {
-        this.defaultPreferences.putAll(defaultPreferences)
+    override fun setDefaultPreferences(preferences: Map<String, ToolWindowPreference>) {
+        this.defaultPreferences.putAll(preferences)
     }
 
     override fun getDefaultAvailabilityToolWindow(id: String?): ToolWindowPreference? {

@@ -19,9 +19,7 @@ abstract class AbstractApplyAvailabilitiesAction : AnAction() {
         val project = e.project ?: return
 
         val dispatcher = ToolWindowManagerDispatcher.getInstance(project)
-
-        val newPrefs = getPreferencesToApply(dispatcher).associateBy { it.id }
-        dispatcher.applyPreferences(newPrefs)
+        dispatcher.applyPreferences(getPreferencesToApply(dispatcher))
     }
 
     /**

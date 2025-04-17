@@ -18,7 +18,7 @@ class ToolWindowManagerSettings : PersistentStateComponent<ToolWindowManagerSett
     @Tag("settings")
     data class SettingsState(
         @Attribute("settings-mode")
-        var settingsMode: SettingsMode? = null
+        var settingsMode: SettingsMode = SettingsMode.GLOBAL
     ) : Serializable
 
     /**
@@ -39,7 +39,7 @@ class ToolWindowManagerSettings : PersistentStateComponent<ToolWindowManagerSett
     /**
      * Gets the current settings mode.
      */
-    fun getSettingsMode(): SettingsMode? {
+    fun getSettingsMode(): SettingsMode {
         return settingsState.settingsMode
     }
 

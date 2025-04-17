@@ -56,10 +56,9 @@ class ToolWindowPreferenceApplier private constructor(@NotNull val project: Proj
      * @param preferences A list of tool window preferences to be applied.
      */
     fun applyPreferencesFrom(@NotNull preferences: List<ToolWindowPreference>) {
+        val manager = ToolWindowManager.getInstance(project)
+        val dispatcher = ToolWindowManagerDispatcher.getInstance(project)
         ApplicationManager.getApplication().invokeLater {
-            val manager = ToolWindowManager.getInstance(project)
-            val dispatcher = ToolWindowManagerDispatcher.getInstance(project)
-
             for (pref in preferences) {
                 val resolved = resolvePreference(pref, dispatcher)
                 applyPreference(manager, resolved)
@@ -82,11 +81,10 @@ class ToolWindowPreferenceApplier private constructor(@NotNull val project: Proj
         if (pref == null || pref.availabilityPreference == UNAFFECTED) {
             val defaultPref = dispatcher.getDefaultAvailabilityToolWindow(pref?.id)
             if (defaultPref != null) {
-                return ToolWindowPreference(pref?.id ?: "", defaultPref.availabilityPreference)
+                return ToolWindowPreference(pref?.id ?: "", defaultPref.availabilityPreference!!)
             }
         }
-        // Return the original preference if it's not UNAFFECTED or pref is null
-        return pref ?: ToolWindowPreference("", UNAFFECTED)
+        return pref!!
     }
 
     /**
