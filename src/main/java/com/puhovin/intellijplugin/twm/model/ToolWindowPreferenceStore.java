@@ -20,7 +20,10 @@ public class ToolWindowPreferenceStore implements Serializable {
 
     public void setPreferences(@NotNull Map<String, ToolWindowPreference> preferencesMap) {
         preferences.clear();
-        preferencesMap.forEach((id, pref) -> preferences.add(new ToolWindowPreference(id, pref.getAvailabilityPreference())));
+        preferencesMap.forEach((id, pref) -> {
+            if (pref == null) return;
+            preferences.add(new ToolWindowPreference(id, pref.getAvailabilityPreference()));
+        });
     }
 
     public @NotNull Map<String, ToolWindowPreference> getPreferences() {

@@ -24,13 +24,19 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.puhovin.intellijplugin.twm.model.AvailabilityPreference.AVAILABLE;
+import static com.puhovin.intellijplugin.twm.model.AvailabilityPreference.UNAFFECTED;
+import static com.puhovin.intellijplugin.twm.model.AvailabilityPreference.UNAVAILABLE;
+
 public final class ToolWindowManagerDispatcher {
+    private static final Key<ToolWindowManagerDispatcher> KEY = Key.create("ToolWindowManagerDispatcher");
+    private static final SettingsMode DEFAULT_SETTINGS_MODE = SettingsMode.GLOBAL;
+    private final Lock lock = new ReentrantLock();
     private final Project project;
     private PreferredAvailabilitiesView configurationComponent;
-    private final Lock lock = new ReentrantLock();
     private final Map<SettingsMode, SettingsManager> settingsManagerMap = new EnumMap<>(SettingsMode.class);
     private SettingsMode settingsMode;
-    private static final Key<ToolWindowManagerDispatcher> KEY = Key.create("ToolWindowManagerDispatcher");
+
 
     public static ToolWindowManagerDispatcher getInstance(@NotNull Project project) {
         ToolWindowManagerDispatcher dispatcher = project.getUserData(KEY);
@@ -50,7 +56,7 @@ public final class ToolWindowManagerDispatcher {
     private void loadSettingsMode() {
         ToolWindowManagerSettings settings = project.getService(ToolWindowManagerSettings.class);
         SettingsMode savedMode = settings.getSettingsMode();
-        this.settingsMode = savedMode != null ? savedMode : SettingsMode.GLOBAL;
+        this.settingsMode = savedMode != null ? savedMode : DEFAULT_SETTINGS_MODE;
         switchSettingsMode(this.settingsMode);
     }
 
@@ -99,7 +105,7 @@ public final class ToolWindowManagerDispatcher {
 
             for (ToolWindowPreference pref : editedPrefs) {
                 ToolWindowPreference defaultPref = getCurrentSettingsManager().getDefaultAvailabilityToolWindow(pref.getId());
-                if (pref.getAvailabilityPreference() != AvailabilityPreference.UNAFFECTED) {
+                if (pref.getAvailabilityPreference() != UNAFFECTED) {
                     toSave.put(pref.getId(), pref);
                 } else {
                     toSave.put(pref.getId(), defaultPref);
@@ -130,9 +136,9 @@ public final class ToolWindowManagerDispatcher {
         return configurationComponent.getCurrentViewState().stream()
                 .anyMatch(editedPref -> {
                     AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.getId()))
-                            .orElse(AvailabilityPreference.UNAFFECTED);
+                            .orElse(UNAFFECTED);
                     AvailabilityPreference edited = Optional.ofNullable(editedPref.getAvailabilityPreference())
-                            .orElse(AvailabilityPreference.UNAFFECTED);
+                            .orElse(UNAFFECTED);
                     return !current.equals(edited);
                 });
     }
@@ -145,7 +151,7 @@ public final class ToolWindowManagerDispatcher {
             ToolWindow tw = manager.getToolWindow(id);
             if (tw != null) {
                 ToolWindowPreference defaultPref = getCurrentSettingsManager().getDefaultPreferences()
-                        .getOrDefault(id, new ToolWindowPreference(id, AvailabilityPreference.UNAFFECTED));
+                        .getOrDefault(id, new ToolWindowPreference(id, UNAFFECTED));
                 ToolWindowPreference pref = getCurrentSettingsManager().getState().getPreferences().getOrDefault(
                         id, defaultPref);
                 result.add(pref);
@@ -199,9 +205,7 @@ public final class ToolWindowManagerDispatcher {
         for (String id : manager.getToolWindowIds()) {
             ToolWindow tw = manager.getToolWindow(id);
             if (tw != null) {
-                AvailabilityPreference actualPref = tw.isAvailable()
-                        ? AvailabilityPreference.AVAILABLE
-                        : AvailabilityPreference.UNAVAILABLE;
+                AvailabilityPreference actualPref = tw.isAvailable() ? AVAILABLE : UNAVAILABLE;
 
                 defaultPreferences.put(id, new ToolWindowPreference(id, actualPref));
             }

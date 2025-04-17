@@ -16,7 +16,7 @@ public final class ToolWindowManagerSettings implements PersistentStateComponent
     @Tag("settings")
     public static class State {
         @Attribute("settings-mode")
-        private SettingsMode settingsMode = SettingsMode.GLOBAL;
+        private SettingsMode settingsMode;
     }
 
     @NotNull

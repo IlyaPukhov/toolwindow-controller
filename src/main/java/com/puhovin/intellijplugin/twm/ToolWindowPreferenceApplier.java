@@ -10,6 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static com.puhovin.intellijplugin.twm.model.AvailabilityPreference.AVAILABLE;
+import static com.puhovin.intellijplugin.twm.model.AvailabilityPreference.UNAFFECTED;
+
 public class ToolWindowPreferenceApplier {
     private final Project project;
     private final ToolWindowManagerDispatcher dispatcher;
@@ -31,9 +34,9 @@ public class ToolWindowPreferenceApplier {
     }
 
     private ToolWindowPreference resolvePreference(@NotNull ToolWindowPreference pref) {
-        if (pref.getAvailabilityPreference() == AvailabilityPreference.UNAFFECTED) {
+        if (pref.getAvailabilityPreference() == UNAFFECTED) {
             ToolWindowPreference defaultPref = dispatcher.getDefaultAvailabilityToolWindow(pref.getId());
-            if (defaultPref != null && defaultPref.getAvailabilityPreference() != AvailabilityPreference.UNAFFECTED) {
+            if (defaultPref != null) {
                 return new ToolWindowPreference(pref.getId(), defaultPref.getAvailabilityPreference());
             }
         }
@@ -45,13 +48,8 @@ public class ToolWindowPreferenceApplier {
         if (tw == null) return;
 
         AvailabilityPreference preference = pref.getAvailabilityPreference();
-        if (preference == AvailabilityPreference.UNAFFECTED) {
-            return;
-        }
+        if (preference == UNAFFECTED) return;
 
-        boolean desiredAvailable = (preference == AvailabilityPreference.AVAILABLE);
-        if (tw.isAvailable() != desiredAvailable) {
-            tw.setAvailable(desiredAvailable, null);
-        }
+        tw.setAvailable((preference == AVAILABLE), null);
     }
 }
