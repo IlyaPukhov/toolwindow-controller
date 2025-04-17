@@ -81,7 +81,7 @@ class ToolWindowPreferenceApplier private constructor(@NotNull val project: Proj
         if (pref == null || pref.availabilityPreference == UNAFFECTED) {
             val defaultPref = dispatcher.getDefaultAvailabilityToolWindow(pref?.id)
             if (defaultPref != null) {
-                return ToolWindowPreference(pref?.id ?: "", defaultPref.availabilityPreference!!)
+                return ToolWindowPreference(defaultPref.id!!, defaultPref.availabilityPreference!!)
             }
         }
         return pref!!

@@ -117,7 +117,7 @@ class ToolWindowManagerDispatcher(private val project: Project) {
         try {
             applyCurrentPreferences()
             val view = PreferredAvailabilitiesViewHolder.getInstance(project)
-            view.reset(getAvailableToolWindows())
+            view.reset(getCurrentAvailabilityToolWindows())
         } finally {
             lock.unlock()
         }
@@ -133,8 +133,7 @@ class ToolWindowManagerDispatcher(private val project: Project) {
         try {
             val toSave = mutableMapOf<String, ToolWindowPreference?>()
             preferences.forEach { pref ->
-                val defaultPref = getCurrentSettingsManager().getDefaultAvailabilityToolWindow(pref.id)
-                toSave[pref.id!!] = if (pref.availabilityPreference != UNAFFECTED) pref else defaultPref
+                toSave[pref.id!!] = if (pref.availabilityPreference != UNAFFECTED) pref else null
             }
             getCurrentSettingsManager().setPreferences(toSave)
             applyCurrentPreferences()

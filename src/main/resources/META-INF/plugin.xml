@@ -21,7 +21,7 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <postStartupActivity implementation="com.puhovin.intellijplugin.twm.initialization.ResetToolWindowsToDefaultsOnStartup" />
+        <postStartupActivity implementation="com.puhovin.intellijplugin.twm.initialization.ApplyToolWindowsPreferencesOnStartup" />
     </extensions>
 
     <resource-bundle>com.puhovin.intellijplugin.twm.bundle</resource-bundle>

@@ -1,10 +1,35 @@
 # 🔧 ToolWindow Manager Advanced for IntelliJ IDEA
 
-**A modern rework of the original [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager)  
-Compatible with IntelliJ IDEA 2024.2+**
+**A modern rework of the original [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager)**  
+**✅ Compatible with IntelliJ IDEA 2024.2+**
 
-This plugin allows you to configure visibility preferences for known tool windows such as *Bookmarks*, *Notifications*,
+This plugin lets you configure visibility preferences for well-known tool windows like *Bookmarks*, *Notifications*,
 etc., and ensures they automatically show or hide depending on the project.
+
+---
+
+## ✨ Features
+
+- Set preferred availability for any tool window per project
+- Supports both global and project-level preferences
+- Automatically restores visibility states on project open
+- Includes "Reset to Defaults" option
+
+---
+
+## 🧾 Notes
+
+- Version `1.0.0` was written in **Java**
+- From version `1.1.0` onward, the plugin is written in **Kotlin**
+- **Project-level settings** are stored in: `.idea/toolwindow-manager-settings.xml`
+- **Global settings** are stored in:
+- On *Windows*: `%APPDATA%\JetBrains\IntelliJIdea<version>\options`
+- On *macOS*: `~/Library/Application Support/JetBrains/IntelliJIdea<version>/options`
+- On *Linux*: `~/.config/JetBrains/IntelliJIdea<version>/options`
+
+---
+
+## 🧭 Usage
 
 To access the configuration:
 

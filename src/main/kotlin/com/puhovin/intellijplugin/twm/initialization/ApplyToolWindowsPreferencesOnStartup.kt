@@ -19,7 +19,7 @@ import com.puhovin.intellijplugin.twm.core.ToolWindowManagerDispatcher
  *
  * @see ToolWindowManagerDispatcher
  */
-class ResetToolWindowsToDefaultsOnStartup : ProjectActivity {
+class ApplyToolWindowsPreferencesOnStartup : ProjectActivity {
 
     /**
      * Executes the reset operation to restore the default visibility settings for tool windows.
@@ -28,10 +28,10 @@ class ResetToolWindowsToDefaultsOnStartup : ProjectActivity {
      * @param project The project that is being opened.
      */
     override suspend fun execute(project: Project) {
+        val dispatcher = ToolWindowManagerDispatcher.getInstance(project)
         ApplicationManager.getApplication().invokeAndWait {
-            val dispatcher = ToolWindowManagerDispatcher.getInstance(project)
             dispatcher.initializeDefaultPreferences(project)
-            dispatcher.reset()
         }
+        dispatcher.applyPreferences(dispatcher.getCurrentAvailabilityToolWindows())
     }
 }
