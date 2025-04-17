@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.puhovin.intellijplugin.twm.ToolWindowManagerDispatcher;
-import com.puhovin.intellijplugin.twm.ToolWindowPreferenceApplier;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,13 +19,12 @@ public abstract class AbstractApplyAvailabilitiesAction extends AnAction {
         if (project == null) return;
 
         ToolWindowManagerDispatcher dispatcher = ToolWindowManagerDispatcher.getInstance(project);
-        List<ToolWindowPreference> prefs = getPreferencesToApply(dispatcher);
 
+        List<ToolWindowPreference> prefs = getPreferencesToApply(dispatcher);
         Map<String, ToolWindowPreference> newPrefs = new HashMap<>();
         prefs.forEach(pref -> newPrefs.put(pref.getId(), pref));
 
         dispatcher.applyPreferences(newPrefs);
-        new ToolWindowPreferenceApplier(project, dispatcher).applyPreferencesFrom(prefs);
     }
 
     @NotNull

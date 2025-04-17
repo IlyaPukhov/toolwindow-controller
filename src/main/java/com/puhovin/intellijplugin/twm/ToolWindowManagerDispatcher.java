@@ -37,7 +37,6 @@ public final class ToolWindowManagerDispatcher {
     private final Map<SettingsMode, SettingsManager> settingsManagerMap = new EnumMap<>(SettingsMode.class);
     private SettingsMode settingsMode;
 
-
     public static ToolWindowManagerDispatcher getInstance(@NotNull Project project) {
         ToolWindowManagerDispatcher dispatcher = project.getUserData(KEY);
         if (dispatcher == null) {
@@ -86,15 +85,6 @@ public final class ToolWindowManagerDispatcher {
         return settingsManagerMap.get(settingsMode);
     }
 
-    public void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences) {
-        lock.lock();
-        try {
-            getCurrentSettingsManager().applyPreferences(preferences);
-        } finally {
-            lock.unlock();
-        }
-    }
-
     public void apply() {
         if (configurationComponent == null) return;
 
@@ -112,17 +102,25 @@ public final class ToolWindowManagerDispatcher {
                 }
             }
 
-            getCurrentSettingsManager().applyPreferences(toSave);
+            applyPreferences(toSave);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences) {
+        lock.lock();
+        try {
+            getCurrentSettingsManager().setPreferences(preferences);
             applyCurrentPreferences();
         } finally {
             lock.unlock();
         }
     }
 
-
     private void applyCurrentPreferences() {
         List<ToolWindowPreference> prefs = getCurrentPreferences();
-        new ToolWindowPreferenceApplier(project, this).applyPreferencesFrom(prefs);
+        ToolWindowPreferenceApplier.getInstance(project).applyPreferencesFrom(prefs);
     }
 
     public boolean isModified() {
@@ -152,7 +150,7 @@ public final class ToolWindowManagerDispatcher {
             if (tw != null) {
                 ToolWindowPreference defaultPref = getCurrentSettingsManager().getDefaultPreferences()
                         .getOrDefault(id, new ToolWindowPreference(id, UNAFFECTED));
-                ToolWindowPreference pref = getCurrentSettingsManager().getState().getPreferences().getOrDefault(
+                ToolWindowPreference pref = getCurrentSettingsManager().getPreferences().getOrDefault(
                         id, defaultPref);
                 result.add(pref);
             }
@@ -187,7 +185,7 @@ public final class ToolWindowManagerDispatcher {
     }
 
     public List<ToolWindowPreference> getCurrentPreferences() {
-        return new ArrayList<>(getCurrentSettingsManager().getState().getPreferences().values());
+        return new ArrayList<>(getCurrentSettingsManager().getPreferences().values());
     }
 
     public @NotNull List<ToolWindowPreference> getDefaultAvailabilityToolWindows() {

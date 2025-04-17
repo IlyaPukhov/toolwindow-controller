@@ -10,31 +10,31 @@ import org.jetbrains.annotations.NotNull;
 
 @Service(Service.Level.PROJECT)
 @State(name = "toolwindow-manager-mode", storages = @Storage("toolwindow-manager-settings.xml"))
-public final class ToolWindowManagerSettings implements PersistentStateComponent<ToolWindowManagerSettings.State> {
-    private State state = new State();
+public final class ToolWindowManagerSettings implements PersistentStateComponent<ToolWindowManagerSettings.SettingsState> {
+    private SettingsState settingsState = new SettingsState();
 
     @Tag("settings")
-    public static class State {
+    public static class SettingsState {
         @Attribute("settings-mode")
         private SettingsMode settingsMode;
     }
 
     @NotNull
     @Override
-    public State getState() {
-        return state;
+    public ToolWindowManagerSettings.SettingsState getState() {
+        return settingsState;
     }
 
     @Override
-    public void loadState(@NotNull State state) {
-        this.state = state;
+    public void loadState(@NotNull ToolWindowManagerSettings.SettingsState settingsState) {
+        this.settingsState = settingsState;
     }
 
     public SettingsMode getSettingsMode() {
-        return state.settingsMode;
+        return settingsState.settingsMode;
     }
 
     public void setSettingsMode(@NotNull SettingsMode settingsMode) {
-        this.state.settingsMode = settingsMode;
+        this.settingsState.settingsMode = settingsMode;
     }
 }

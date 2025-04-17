@@ -4,37 +4,20 @@
     <vendor email="dinamond2003@gmail.com">Ilya Pukhov</vendor>
     <description><![CDATA[
 <html>
-<h2>🛠️ ToolWindow Manager Advanced</h2>
+  <h2 style="margin-top:0;">🛠️ ToolWindow Manager Advanced</h2>
+  <p>Manage tool windows visibility globally or per project.</p>
 
-<p>Revolutionize your IDE workspace with multi-level ToolWindow configuration. Easily manage visibility of tool windows at global and project levels.</p>
+  <ul>
+    <li>⚙️ Global defaults</li>
+    <li>📂 Project overrides</li>
+    <li>🔁 Auto-apply on startup</li>
+  </ul>
 
-<h3>🌟 Key Features</h3>
-<ul>
-  <li>⚙️ Global default configurations</li>
-  <li>🎯 Project-specific overrides</li>
-  <li>🔁 Automatic settings application</li>
-</ul>
-
-<h3>📊 Hierarchical Management</h3>
-<p><b>🌍 Global Level:</b> Set defaults for the entire IDE instance.<br/>
-<b>📂 Project Level:</b> Customize tool window visibility per project needs.</p>
-
-<h3>🚀 Benefits</h3>
-<ul>
-  <li><b>For Teams:</b> Maintain consistency, reduce onboarding time, enforce best practices</li>
-  <li><b>For Developers:</b> Switch setups fast, enjoy cleaner workspace, personalize workflow</li>
-</ul>
-
-<h3>💡 Usage Examples</h3>
-<ol>
-  <li>New Project Setup: Apply tech stack profile</li>
-  <li>Code Review: Enable analysis tools</li>
-  <li>Debugging: Activate monitoring panels</li>
-</ol>
-
-<p><b>📥 Install once — customize infinitely!</b></p>
+  <p><b>Use cases:</b> clean setups, fast onboarding, workflow switching.</p>
+  <p><b>📥 One-time setup — flexible forever.</b></p>
 </html>
 ]]></description>
+
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
