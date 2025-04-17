@@ -7,6 +7,7 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.puhovin.intellijplugin.twm.ToolWindowManagerBundle;
 import com.puhovin.intellijplugin.twm.ToolWindowManagerDispatcher;
+import com.puhovin.intellijplugin.twm.ui.PreferredAvailabilitiesViewHolder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +39,7 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
 
             @Override
             public JComponent createComponent() {
-                return dispatcher.getConfigurationComponent();
+                return PreferredAvailabilitiesViewHolder.getInstance(project);
             }
 
             @Override
@@ -58,7 +59,7 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
 
             @Override
             public void disposeUIResources() {
-                dispatcher.disposeUIResources();
+                PreferredAvailabilitiesViewHolder.dispose(project);
             }
         });
     }

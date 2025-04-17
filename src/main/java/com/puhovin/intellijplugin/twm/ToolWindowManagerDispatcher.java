@@ -12,6 +12,8 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
 import com.puhovin.intellijplugin.twm.settingsmanager.GlobalToolWindowManagerService;
 import com.puhovin.intellijplugin.twm.settingsmanager.ProjectToolWindowManagerService;
 import com.puhovin.intellijplugin.twm.settingsmanager.SettingsManager;
+import com.puhovin.intellijplugin.twm.ui.PreferredAvailabilitiesView;
+import com.puhovin.intellijplugin.twm.ui.PreferredAvailabilitiesViewHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -33,7 +35,6 @@ public final class ToolWindowManagerDispatcher {
     private static final SettingsMode DEFAULT_SETTINGS_MODE = SettingsMode.GLOBAL;
     private final Lock lock = new ReentrantLock();
     private final Project project;
-    private PreferredAvailabilitiesView configurationComponent;
     private final Map<SettingsMode, SettingsManager> settingsManagerMap = new EnumMap<>(SettingsMode.class);
     private SettingsMode settingsMode;
 
@@ -67,30 +68,11 @@ public final class ToolWindowManagerDispatcher {
         }
     }
 
-    public SettingsMode getSettingsMode() {
-        return settingsMode;
-    }
-
-    public void switchSettingsMode(@NotNull SettingsMode settingsMode) {
-        this.settingsMode = settingsMode;
-        saveSettingsMode(settingsMode);
-    }
-
-    private void saveSettingsMode(@NotNull SettingsMode settingsMode) {
-        ToolWindowManagerSettings settings = project.getService(ToolWindowManagerSettings.class);
-        settings.setSettingsMode(settingsMode);
-    }
-
-    public SettingsManager getCurrentSettingsManager() {
-        return settingsManagerMap.get(settingsMode);
-    }
-
     public void apply() {
-        if (configurationComponent == null) return;
-
         lock.lock();
         try {
-            List<ToolWindowPreference> editedPrefs = configurationComponent.getCurrentViewState();
+            PreferredAvailabilitiesView view = PreferredAvailabilitiesViewHolder.getInstance(project);
+            List<ToolWindowPreference> editedPrefs = view.getCurrentViewState();
             Map<String, ToolWindowPreference> toSave = new HashMap<>();
 
             for (ToolWindowPreference pref : editedPrefs) {
@@ -103,6 +85,35 @@ public final class ToolWindowManagerDispatcher {
             }
 
             applyPreferences(toSave);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public boolean isModified() {
+        PreferredAvailabilitiesView view = PreferredAvailabilitiesViewHolder.getInstance(project);
+
+        Map<String, AvailabilityPreference> currentPrefs = new HashMap<>();
+        getCurrentPreferences().forEach(pref ->
+                currentPrefs.put(pref.getId(), pref.getAvailabilityPreference())
+        );
+
+        return view.getCurrentViewState().stream()
+                .anyMatch(editedPref -> {
+                    AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.getId()))
+                            .orElse(UNAFFECTED);
+                    AvailabilityPreference edited = Optional.ofNullable(editedPref.getAvailabilityPreference())
+                            .orElse(UNAFFECTED);
+                    return !current.equals(edited);
+                });
+    }
+
+    public void reset() {
+        lock.lock();
+        try {
+            applyCurrentPreferences();
+            PreferredAvailabilitiesView view = PreferredAvailabilitiesViewHolder.getInstance(project);
+            view.reset(getAvailableToolWindows());
         } finally {
             lock.unlock();
         }
@@ -121,24 +132,6 @@ public final class ToolWindowManagerDispatcher {
     private void applyCurrentPreferences() {
         List<ToolWindowPreference> prefs = getCurrentPreferences();
         ToolWindowPreferenceApplier.getInstance(project).applyPreferencesFrom(prefs);
-    }
-
-    public boolean isModified() {
-        if (configurationComponent == null) return false;
-
-        Map<String, AvailabilityPreference> currentPrefs = new HashMap<>();
-        getCurrentPreferences().forEach(pref ->
-                currentPrefs.put(pref.getId(), pref.getAvailabilityPreference())
-        );
-
-        return configurationComponent.getCurrentViewState().stream()
-                .anyMatch(editedPref -> {
-                    AvailabilityPreference current = Optional.ofNullable(currentPrefs.get(editedPref.getId()))
-                            .orElse(UNAFFECTED);
-                    AvailabilityPreference edited = Optional.ofNullable(editedPref.getAvailabilityPreference())
-                            .orElse(UNAFFECTED);
-                    return !current.equals(edited);
-                });
     }
 
     public List<ToolWindowPreference> getAvailableToolWindows() {
@@ -160,28 +153,22 @@ public final class ToolWindowManagerDispatcher {
         return result;
     }
 
-    public PreferredAvailabilitiesView getConfigurationComponent() {
-        if (configurationComponent == null) {
-            configurationComponent = new PreferredAvailabilitiesView(project, this);
-        }
-        return configurationComponent;
+    public SettingsMode getSettingsMode() {
+        return settingsMode;
     }
 
-    public void disposeUIResources() {
-        configurationComponent = null;
+    public void switchSettingsMode(@NotNull SettingsMode settingsMode) {
+        this.settingsMode = settingsMode;
+        saveSettingsMode(settingsMode);
     }
 
-    public void reset() {
-        lock.lock();
-        try {
-            applyCurrentPreferences();
+    private void saveSettingsMode(@NotNull SettingsMode settingsMode) {
+        ToolWindowManagerSettings settings = project.getService(ToolWindowManagerSettings.class);
+        settings.setSettingsMode(settingsMode);
+    }
 
-            if (configurationComponent != null) {
-                configurationComponent.reset(getAvailableToolWindows());
-            }
-        } finally {
-            lock.unlock();
-        }
+    public SettingsManager getCurrentSettingsManager() {
+        return settingsManagerMap.get(settingsMode);
     }
 
     public List<ToolWindowPreference> getCurrentPreferences() {

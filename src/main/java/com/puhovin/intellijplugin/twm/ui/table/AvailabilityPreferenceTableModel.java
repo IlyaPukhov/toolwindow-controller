@@ -1,4 +1,4 @@
-package com.puhovin.intellijplugin.twm.table;
+package com.puhovin.intellijplugin.twm.ui.table;
 
 import com.puhovin.intellijplugin.twm.ToolWindowManagerBundle;
 import com.puhovin.intellijplugin.twm.model.AvailabilityPreference;

@@ -1,11 +1,12 @@
-package com.puhovin.intellijplugin.twm;
+package com.puhovin.intellijplugin.twm.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
+import com.puhovin.intellijplugin.twm.ToolWindowManagerDispatcher;
 import com.puhovin.intellijplugin.twm.model.SettingsMode;
 import com.puhovin.intellijplugin.twm.model.ToolWindowPreference;
-import com.puhovin.intellijplugin.twm.table.AvailabilityPreferenceJTable;
-import com.puhovin.intellijplugin.twm.table.AvailabilityPreferenceTableModel;
+import com.puhovin.intellijplugin.twm.ui.table.AvailabilityPreferenceJTable;
+import com.puhovin.intellijplugin.twm.ui.table.AvailabilityPreferenceTableModel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JCheckBox;

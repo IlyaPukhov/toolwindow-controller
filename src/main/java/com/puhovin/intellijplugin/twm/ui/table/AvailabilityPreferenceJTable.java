@@ -1,4 +1,4 @@
-package com.puhovin.intellijplugin.twm.table;
+package com.puhovin.intellijplugin.twm.ui.table;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
