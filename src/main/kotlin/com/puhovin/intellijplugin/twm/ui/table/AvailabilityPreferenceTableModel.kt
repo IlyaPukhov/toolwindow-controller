@@ -24,14 +24,14 @@ class AvailabilityPreferenceTableModel : AbstractTableModel() {
         require(rowIndex in 0 until toolWindowPreferences.size) {
             MessageFormat.format(INVALID_ROW_INDEX_MESSAGE, 0, toolWindowPreferences.size - 1, rowIndex)
         }
-        return toolWindowPreferences[rowIndex].id
+        return toolWindowPreferences[rowIndex].id!!
     }
 
     private fun getAvailabilityPreference(rowIndex: Int): AvailabilityPreference {
         require(rowIndex in 0 until toolWindowPreferences.size) {
             MessageFormat.format(INVALID_ROW_INDEX_MESSAGE, 0, toolWindowPreferences.size - 1, rowIndex)
         }
-        return toolWindowPreferences[rowIndex].availabilityPreference
+        return toolWindowPreferences[rowIndex].availabilityPreference!!
     }
 
     fun setToolWindowPreferences(newPreferences: List<ToolWindowPreference>) {
@@ -71,11 +71,11 @@ class AvailabilityPreferenceTableModel : AbstractTableModel() {
         val currentRowValue = toolWindowPreferences[rowIndex]
         val newRowValue = when (columnIndex) {
             AvailabilityPreferenceJTable.TOOL_WINDOW_ID_COLUMN_INDEX -> {
-                ToolWindowPreference(aValue as String, currentRowValue.availabilityPreference)
+                ToolWindowPreference(aValue as String, currentRowValue.availabilityPreference!!)
             }
 
             AvailabilityPreferenceJTable.AVAILABILITY_PREFERENCE_COLUMN_INDEX -> {
-                ToolWindowPreference(currentRowValue.id, aValue as AvailabilityPreference)
+                ToolWindowPreference(currentRowValue.id!!, aValue as AvailabilityPreference)
             }
 
             else -> null

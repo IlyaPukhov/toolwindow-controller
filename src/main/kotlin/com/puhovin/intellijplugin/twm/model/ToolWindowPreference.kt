@@ -6,16 +6,20 @@ import com.intellij.util.xmlb.annotations.Tag
 import java.io.Serializable
 
 @Tag("toolwindow")
-data class ToolWindowPreference(
+class ToolWindowPreference() : Serializable {
+
     @Attribute("id")
-    val id: String,
+    var id: String? = null
 
     @Attribute(value = "preference", converter = AvailabilityPreferenceConverter::class)
-    val availabilityPreference: AvailabilityPreference
-) : Serializable {
+    var availabilityPreference: AvailabilityPreference? = null
+
+    constructor(id: String, availabilityPreference: AvailabilityPreference) : this() {
+        this.id = id
+        this.availabilityPreference = availabilityPreference
+    }
 
     class AvailabilityPreferenceConverter : Converter<AvailabilityPreference>() {
-
         override fun fromString(value: String): AvailabilityPreference =
             try {
                 AvailabilityPreference.valueOf(value)

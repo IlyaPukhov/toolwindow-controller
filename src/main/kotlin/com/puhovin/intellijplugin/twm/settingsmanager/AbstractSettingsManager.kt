@@ -5,8 +5,8 @@ import com.puhovin.intellijplugin.twm.model.ToolWindowPreferenceStore
 
 abstract class AbstractSettingsManager : SettingsManager {
 
-    protected var state = ToolWindowPreferenceStore()
-    protected val defaultPreferences = mutableMapOf<String, ToolWindowPreference>()
+    private var state = ToolWindowPreferenceStore()
+    private val defaultPreferences = mutableMapOf<String, ToolWindowPreference>()
 
     override fun getState(): ToolWindowPreferenceStore {
         return state

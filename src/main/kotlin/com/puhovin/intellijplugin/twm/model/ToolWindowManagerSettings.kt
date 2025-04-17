@@ -6,6 +6,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
+import java.io.Serializable
 import org.jetbrains.annotations.NotNull
 
 @Service(Service.Level.PROJECT)
@@ -18,7 +19,7 @@ class ToolWindowManagerSettings : PersistentStateComponent<ToolWindowManagerSett
     data class SettingsState(
         @Attribute("settings-mode")
         var settingsMode: SettingsMode? = null
-    )
+    ) : Serializable
 
     /**
      * Gets the current state of the settings.

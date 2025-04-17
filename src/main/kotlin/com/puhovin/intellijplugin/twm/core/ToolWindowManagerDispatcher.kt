@@ -35,10 +35,12 @@ import java.util.concurrent.locks.ReentrantLock
  * @see PreferredAvailabilitiesView
  */
 class ToolWindowManagerDispatcher(private val project: Project) {
-
     private val lock: Lock = ReentrantLock()
     private val settingsManagerMap: MutableMap<SettingsMode, SettingsManager> = EnumMap(SettingsMode::class.java)
-    private var settingsMode: SettingsMode = DEFAULT_SETTINGS_MODE
+    private var _settingsMode: SettingsMode = DEFAULT_SETTINGS_MODE
+
+    val settingsMode: SettingsMode
+        get() = _settingsMode
 
     init {
         initializeSettingsManagerMap()
@@ -67,7 +69,7 @@ class ToolWindowManagerDispatcher(private val project: Project) {
      */
     private fun loadSettingsMode() {
         val settings = project.getService(ToolWindowManagerSettings::class.java)
-        settingsMode = settings.getSettingsMode() ?: DEFAULT_SETTINGS_MODE
+        _settingsMode = settings.getSettingsMode() ?: DEFAULT_SETTINGS_MODE
         switchSettingsMode(settingsMode)
     }
 
@@ -92,7 +94,7 @@ class ToolWindowManagerDispatcher(private val project: Project) {
 
             editedPrefs.forEach { pref ->
                 val defaultPref = getCurrentSettingsManager().getDefaultAvailabilityToolWindow(pref.id)
-                toSave[pref.id] = if (pref.availabilityPreference != UNAFFECTED) pref else defaultPref
+                toSave[pref.id!!] = if (pref.availabilityPreference != UNAFFECTED) pref else defaultPref
             }
 
             applyPreferences(toSave)
@@ -176,19 +178,12 @@ class ToolWindowManagerDispatcher(private val project: Project) {
     }
 
     /**
-     * Retrieves the current settings mode (global or project-specific).
-     *
-     * @return The current settings mode.
-     */
-    fun getSettingsMode(): SettingsMode = settingsMode
-
-    /**
      * Switches to a different settings mode (global or project-specific).
      *
      * @param settingsMode The new settings mode.
      */
     fun switchSettingsMode(settingsMode: SettingsMode) {
-        this.settingsMode = settingsMode
+        _settingsMode = settingsMode
         saveSettingsMode(settingsMode)
     }
 

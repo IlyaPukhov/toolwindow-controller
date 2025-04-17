@@ -32,7 +32,7 @@ class PreferredAvailabilitiesView(
 
     private fun initializePanel(): JPanel {
         val globalModeCheckbox = JCheckBox("Use global settings")
-        globalModeCheckbox.isSelected = dispatcher.getSettingsMode().value
+        globalModeCheckbox.isSelected = dispatcher.settingsMode.value
         globalModeCheckbox.addActionListener {
             val useGlobal = globalModeCheckbox.isSelected
             dispatcher.switchSettingsMode(SettingsMode.fromBoolean(useGlobal))
