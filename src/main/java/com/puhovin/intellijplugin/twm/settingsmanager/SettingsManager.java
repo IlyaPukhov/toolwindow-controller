@@ -20,11 +20,9 @@ public interface SettingsManager extends PersistentStateComponent<ToolWindowPref
 
     Map<String, ToolWindowPreference> getDefaultPreferences();
 
-    @NotNull List<ToolWindowPreference> getPreferredAvailabilities();
+    void setDefaultPreferences(@NotNull Map<String, ToolWindowPreference> preferences);
 
-    @NotNull List<ToolWindowPreference> getDefaultAvailabilities();
+    @NotNull List<ToolWindowPreference> getPreferredAvailabilityToolWindows();
 
-    ToolWindowPreference getDefaultAvailability(String id);
-
-    void resetToDefaults();
+    ToolWindowPreference getDefaultAvailabilityToolWindow(String id);
 }

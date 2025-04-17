@@ -11,6 +11,6 @@ public class ApplyDefaultAvailabilitiesAction extends AbstractApplyAvailabilitie
     @Override
     @NotNull
     protected List<ToolWindowPreference> getPreferencesToApply(@NotNull ToolWindowManagerDispatcher dispatcher) {
-        return dispatcher.getDefaultAvailabilities();
+        return dispatcher.getDefaultAvailabilityToolWindows();
     }
 }

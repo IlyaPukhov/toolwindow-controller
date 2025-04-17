@@ -34,8 +34,6 @@ public class PreferredAvailabilitiesView extends JPanel {
     private @NotNull JPanel initializePanel() {
         JCheckBox globalModeCheckbox = new JCheckBox("Use global settings");
         globalModeCheckbox.setSelected(dispatcher.getSettingsMode().getValue());
-        globalModeCheckbox.setFocusPainted(false);
-        globalModeCheckbox.setFocusable(false);
         globalModeCheckbox.addActionListener(e -> {
             boolean useGlobal = globalModeCheckbox.isSelected();
             dispatcher.switchSettingsMode(SettingsMode.fromBoolean(useGlobal));
@@ -49,8 +47,7 @@ public class PreferredAvailabilitiesView extends JPanel {
 
     private void populateTableModel(List<ToolWindowPreference> preferences) {
         AvailabilityPreferenceTableModel model = (AvailabilityPreferenceTableModel) table.getModel();
-        model.removeToolWindowPreferences();
-        preferences.forEach(model::addToolWindowPreference);
+        model.setToolWindowPreferences(preferences);
     }
 
     @NotNull

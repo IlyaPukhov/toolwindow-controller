@@ -17,6 +17,6 @@ public class ToolWindowManagerActionGroup extends DefaultActionGroup {
     public void update(AnActionEvent e) {
         Project project = e.getProject();
 
-        e.getPresentation().setEnabledAndVisible(project != null && !project.isDefault());
+        e.getPresentation().setEnabledAndVisible(project != null);
     }
 }

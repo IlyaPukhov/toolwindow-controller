@@ -1,7 +1,9 @@
 package com.puhovin.intellijplugin.twm.model;
 
+import com.intellij.util.xmlb.Converter;
 import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 
@@ -11,7 +13,7 @@ public class ToolWindowPreference implements Serializable {
     @Attribute("id")
     private String id;
 
-    @Attribute("preference")
+    @Attribute(value = "preference", converter = AvailabilityPreferenceConverter.class)
     private AvailabilityPreference availabilityPreference;
 
     public ToolWindowPreference() {}
@@ -42,5 +44,18 @@ public class ToolWindowPreference implements Serializable {
         int result = id.hashCode();
         result = 31 * result + availabilityPreference.hashCode();
         return result;
+    }
+
+    public static class AvailabilityPreferenceConverter extends Converter<AvailabilityPreference> {
+
+        @Override
+        public AvailabilityPreference fromString(@NotNull String value) {
+            return AvailabilityPreference.valueOf(value);
+        }
+
+        @Override
+        public String toString(AvailabilityPreference value) {
+            return value.name();
+        }
     }
 }

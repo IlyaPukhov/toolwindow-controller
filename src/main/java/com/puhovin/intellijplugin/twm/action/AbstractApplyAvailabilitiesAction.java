@@ -17,7 +17,7 @@ public abstract class AbstractApplyAvailabilitiesAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getProject();
-        if (project == null || project.isDefault()) return;
+        if (project == null) return;
 
         ToolWindowManagerDispatcher dispatcher = ToolWindowManagerDispatcher.getInstance(project);
         List<ToolWindowPreference> prefs = getPreferencesToApply(dispatcher);
@@ -26,7 +26,7 @@ public abstract class AbstractApplyAvailabilitiesAction extends AnAction {
         prefs.forEach(pref -> newPrefs.put(pref.getId(), pref));
 
         dispatcher.applyPreferences(newPrefs);
-        new ToolWindowPreferenceApplier(project).applyPreferencesFrom(prefs);
+        new ToolWindowPreferenceApplier(project, dispatcher).applyPreferencesFrom(prefs);
     }
 
     @NotNull

@@ -22,6 +22,7 @@ public abstract class AbstractSettingsManager implements SettingsManager {
     @Override
     public void loadState(@NotNull ToolWindowPreferenceStore state) {
         this.state = state;
+        applyPreferences(state.getPreferences());
     }
 
     @Override
@@ -30,27 +31,22 @@ public abstract class AbstractSettingsManager implements SettingsManager {
     }
 
     @Override
+    public void setDefaultPreferences(@NotNull Map<String, ToolWindowPreference> defaultPreferences) {
+        this.defaultPreferences.putAll(defaultPreferences);
+    }
+
+    @Override
     public void applyPreferences(@NotNull Map<String, ToolWindowPreference> preferences) {
-        state.setAllPreferences(preferences);
+        this.state.setPreferences(preferences);
     }
 
     @Override
-    public @NotNull List<ToolWindowPreference> getPreferredAvailabilities() {
-        return new ArrayList<>(state.getAllPreferences().values());
+    public @NotNull List<ToolWindowPreference> getPreferredAvailabilityToolWindows() {
+        return new ArrayList<>(state.getPreferences().values());
     }
 
     @Override
-    public @NotNull List<ToolWindowPreference> getDefaultAvailabilities() {
-        return new ArrayList<>(defaultPreferences.values());
-    }
-
-    @Override
-    public ToolWindowPreference getDefaultAvailability(String id) {
+    public ToolWindowPreference getDefaultAvailabilityToolWindow(String id) {
         return defaultPreferences.get(id);
-    }
-
-    @Override
-    public void resetToDefaults() {
-        state.setAllPreferences(defaultPreferences);
     }
 }

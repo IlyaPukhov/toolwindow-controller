@@ -18,12 +18,12 @@ public class ToolWindowPreferenceStore implements Serializable {
     @XCollection
     private final List<ToolWindowPreference> preferences = new ArrayList<>();
 
-    public void setAllPreferences(@NotNull Map<String, ToolWindowPreference> preferencesMap) {
+    public void setPreferences(@NotNull Map<String, ToolWindowPreference> preferencesMap) {
         preferences.clear();
         preferencesMap.forEach((id, pref) -> preferences.add(new ToolWindowPreference(id, pref.getAvailabilityPreference())));
     }
 
-    public @NotNull Map<String, ToolWindowPreference> getAllPreferences() {
+    public @NotNull Map<String, ToolWindowPreference> getPreferences() {
         return preferences.stream()
                 .collect(toMap(ToolWindowPreference::getId, Function.identity()));
     }

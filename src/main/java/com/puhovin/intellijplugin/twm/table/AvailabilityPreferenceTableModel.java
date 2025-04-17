@@ -48,18 +48,14 @@ public class AvailabilityPreferenceTableModel extends AbstractTableModel {
         return toolWindowPreferences.get(rowIndex).getAvailabilityPreference();
     }
 
-    public void addToolWindowPreference(@NotNull final ToolWindowPreference toolWindowPreference) {
-        toolWindowPreferences.add(toolWindowPreference);
+    public void setToolWindowPreferences(@NotNull List<ToolWindowPreference> newPreferences) {
+        toolWindowPreferences.clear();
+        toolWindowPreferences.addAll(newPreferences);
         fireTableDataChanged();
     }
 
     public @NotNull List<ToolWindowPreference> getToolWindowPreferences() {
         return Collections.unmodifiableList(toolWindowPreferences);
-    }
-
-    public void removeToolWindowPreferences() {
-        toolWindowPreferences.clear();
-        fireTableDataChanged();
     }
 
     public int getColumnCount() {

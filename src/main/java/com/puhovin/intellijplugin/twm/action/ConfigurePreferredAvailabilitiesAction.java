@@ -18,8 +18,8 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getProject();
+        if (project == null) return;
 
-        if (project == null || project.isDefault()) return;
         ToolWindowManagerDispatcher dispatcher = ToolWindowManagerDispatcher.getInstance(project);
         ShowSettingsUtil.getInstance().editConfigurable(project, new Configurable() {
 
@@ -38,7 +38,7 @@ public class ConfigurePreferredAvailabilitiesAction extends AnAction {
 
             @Override
             public JComponent createComponent() {
-                return dispatcher.createComponent();
+                return dispatcher.getConfigurationComponent();
             }
 
             @Override
