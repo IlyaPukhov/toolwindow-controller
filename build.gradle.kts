@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.puhovin.intellijplugin"
-version = "1.1.0"
+version = "1.2.0"
 
 repositories {
     mavenCentral()
@@ -16,21 +16,20 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity("2024.2.1")
+        intellijIdeaCommunity("2024.2")
     }
 }
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
 tasks {
     patchPluginXml {
-        pluginName = "ToolWindow Manager"
+        pluginName = "ToolWindow Controller"
         sinceBuild = "242"
-        untilBuild = "999.*"
     }
 
     signPlugin {

@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "toolwindow-manager-advanced"
+rootProject.name = "toolwindow-controller"
