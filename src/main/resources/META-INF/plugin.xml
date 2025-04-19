@@ -1,10 +1,10 @@
 <idea-plugin>
-    <id>com.puhovin.intellijplugin.twm</id>
-    <name>ToolWindow Manager Advanced</name>
+    <id>com.puhovin.intellijplugin.twc</id>
+    <name>ToolWindow Controller</name>
     <vendor email="dinamond2003@gmail.com">Ilya Pukhov</vendor>
     <description><![CDATA[
 <html>
-  <h2 style="margin-top:0;">🛠️ ToolWindow Manager Advanced</h2>
+  <h2 style="margin-top:0;">🛠️ ToolWindow Controller</h2>
   <p>Manage tool windows visibility globally or per project.</p>
 
   <ul>
@@ -21,21 +21,22 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <postStartupActivity implementation="com.puhovin.intellijplugin.twm.initialization.ApplyToolWindowsPreferencesOnStartup" />
+        <postStartupActivity
+                implementation="com.puhovin.intellijplugin.twc.initialization.ApplyToolWindowsPreferencesOnStartup" />
     </extensions>
 
-    <resource-bundle>com.puhovin.intellijplugin.twm.bundle</resource-bundle>
+    <resource-bundle>com.puhovin.intellijplugin.twc.bundle</resource-bundle>
 
     <actions>
         <group id="ToolWindowManagerActionGroup"
-               class="com.puhovin.intellijplugin.twm.action.ToolWindowManagerActionGroup"
+               class="com.puhovin.intellijplugin.twc.action.ToolWindowControllerActionGroup"
                popup="true">
             <action id="ConfigurePreferredAvailabilitiesAction"
-                    class="com.puhovin.intellijplugin.twm.action.ConfigurePreferredAvailabilitiesAction" />
+                    class="com.puhovin.intellijplugin.twc.action.ConfigurePreferredAvailabilitiesAction" />
             <action id="ApplyPreferredAvailabilitiesAction"
-                    class="com.puhovin.intellijplugin.twm.action.ApplyPreferredAvailabilitiesAction" />
+                    class="com.puhovin.intellijplugin.twc.action.ApplyPreferredAvailabilitiesAction" />
             <action id="ApplyDefaultAvailabilitiesAction"
-                    class="com.puhovin.intellijplugin.twm.action.ApplyDefaultAvailabilitiesAction" />
+                    class="com.puhovin.intellijplugin.twc.action.ApplyDefaultAvailabilitiesAction" />
             <add-to-group group-id="ToolsMenu" anchor="last" />
         </group>
     </actions>
