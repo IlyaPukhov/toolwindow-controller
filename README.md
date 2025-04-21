@@ -7,9 +7,9 @@
 <h1 align="center">🔧 ToolWindow Controller for Intellij-based IDEs</h1> 
 
 <p align="center">
-<a href="https://plugins.jetbrains.com/plugin/27133-toolwindow-controller"><img src="https://img.shields.io/jetbrains/plugin/r/stars/27133?style=flat-square"></a>
-<a href="https://plugins.jetbrains.com/embeddable/install/27133"><img src="https://img.shields.io/jetbrains/plugin/d/27133-toolwindow-controller.svg?style=flat-square"></a>
-<a href="https://plugins.jetbrains.com/plugin/27133-toolwindow-controller"><img src="https://img.shields.io/jetbrains/plugin/v/27133-toolwindow-controller.svg?style=flat-square"></a>
+<a href="https://plugins.jetbrains.com/plugin/27133-toolwindow-controller"><img src="https://img.shields.io/jetbrains/plugin/r/stars/27133?style=flat"></a>
+<a href="https://plugins.jetbrains.com/embeddable/install/27133"><img src="https://img.shields.io/jetbrains/plugin/d/27133-toolwindow-controller.svg?style=flat"></a>
+<a href="https://plugins.jetbrains.com/plugin/27133-toolwindow-controller"><img src="https://img.shields.io/jetbrains/plugin/v/27133-toolwindow-controller.svg?style=flat"></a>
 </p>
 
 **Inspired by the outdated [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager)**  
