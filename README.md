@@ -1,4 +1,16 @@
-# 🔧 ToolWindow Controller for Intellij-based IDEs
+<div align="center">
+    <a href="https://plugins.jetbrains.com/plugin/27133-toolwindow-controller">
+        <img src="./src/main/resources/META-INF/pluginIcon.svg" width="160" height="160" alt="logo"/>
+    </a>
+</div>
+
+<h1 align="center">🔧 ToolWindow Controller for Intellij-based IDEs</h1> 
+
+<p align="center">
+<a href="https://plugins.jetbrains.com/plugin/27133-toolwindow-controller"><img src="https://img.shields.io/jetbrains/plugin/r/stars/27133?style=flat-square"></a>
+<a href="https://plugins.jetbrains.com/embeddable/install/27133"><img src="https://img.shields.io/jetbrains/plugin/d/27133-toolwindow-controller.svg?style=flat-square"></a>
+<a href="https://plugins.jetbrains.com/plugin/27133-toolwindow-controller"><img src="https://img.shields.io/jetbrains/plugin/v/27133-toolwindow-controller.svg?style=flat-square"></a>
+</p>
 
 **Inspired by the outdated [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager)**  
 **✅ Supported on IntelliJ-based IDEs starting from version 2024.2**
