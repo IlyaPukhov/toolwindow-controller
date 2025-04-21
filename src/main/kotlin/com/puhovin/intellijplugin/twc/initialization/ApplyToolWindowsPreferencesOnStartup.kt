@@ -11,8 +11,7 @@ import com.puhovin.intellijplugin.twc.core.ToolWindowPreferencesManager
  * It executes the reset operation after the project is fully opened, ensuring that the
  * tool window preferences are restored to their defaults.
  *
- * The [ToolWindowPreferencesManager] is used to initialize the default tool window preferences
- * and apply them by invoking the [ToolWindowPreferencesManager.reset] method.
+ * The [ToolWindowPreferencesManager] is used to initialize the default tool window preferences.
  *
  * This activity is triggered automatically when the project is started and does not require
  * any user interaction.
@@ -31,7 +30,7 @@ class ApplyToolWindowsPreferencesOnStartup : ProjectActivity {
         val manager = ToolWindowPreferencesManager.getInstance(project)
         ApplicationManager.getApplication().invokeAndWait {
             manager.initializeDefaultPreferences(project)
+            manager.reset()
         }
-        manager.applyPreferences(manager.getCurrentAvailabilityToolWindows())
     }
 }

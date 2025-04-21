@@ -76,8 +76,7 @@ class ToolWindowPreferencesManager(private val project: Project) {
      * Initializes the settings manager map with services for global and project-level tool window management.
      */
     private fun initializeSettingsManagerMap() {
-        settingsManagerMap[SettingsMode.GLOBAL] =
-            ApplicationManager.getApplication().getService(GlobalToolWindowManagerService::class.java)
+        settingsManagerMap[SettingsMode.GLOBAL] = ApplicationManager.getApplication().getService(GlobalToolWindowManagerService::class.java)
         settingsManagerMap[SettingsMode.PROJECT] = project.getService(ProjectToolWindowManagerService::class.java)
     }
 
@@ -115,9 +114,9 @@ class ToolWindowPreferencesManager(private val project: Project) {
     fun reset() {
         lock.lock()
         try {
-            applyCurrentPreferences()
+            applyPreferences(getCurrentAvailabilityToolWindows())
             val view = PreferredAvailabilitiesViewHolder.getInstance(project)
-            view.reset(getCurrentAvailabilityToolWindows())
+            view.reset(getAvailableToolWindows())
         } finally {
             lock.unlock()
         }
