@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.puhovin.intellijplugin"
-version = "1.2.0"
+version = "1.2.1"
 
 repositories {
     mavenCentral()
@@ -30,6 +30,7 @@ tasks {
     patchPluginXml {
         pluginName = "ToolWindow Controller"
         sinceBuild = "242"
+        untilBuild = "252.*"
     }
 
     signPlugin {

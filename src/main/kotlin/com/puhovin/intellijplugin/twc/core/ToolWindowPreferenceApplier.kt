@@ -91,7 +91,7 @@ class ToolWindowPreferenceApplier private constructor(@NotNull val project: Proj
      * Applies the resolved tool window preference to the corresponding tool window.
      * The availability of the tool window is adjusted based on the resolved preference.
      *
-     * @param manager The tool window manager for the project.
+     * @param manager The tool window preferences manager for the project.
      * @param pref The resolved tool window preference to be applied.
      */
     private fun applyPreference(@NotNull manager: ToolWindowManager, @NotNull pref: ToolWindowPreference) {
