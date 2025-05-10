@@ -1,7 +1,5 @@
 <div align="center">
-    <a href="https://plugins.jetbrains.com/plugin/27133-toolwindow-controller">
-        <img src="./src/main/resources/META-INF/pluginIcon.svg" width="160" height="160" alt="logo"/>
-    </a>
+    <img src="./src/main/resources/META-INF/pluginIcon.svg" width="160" height="160" alt="logo"/>
 </div>
 
 <h1 align="center">🔧 ToolWindow Controller for Intellij-based IDEs</h1> 
