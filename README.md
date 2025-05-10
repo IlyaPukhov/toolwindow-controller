@@ -7,7 +7,7 @@
 <h1 align="center">🔧 ToolWindow Controller for Intellij-based IDEs</h1> 
 
 **Inspired by the outdated [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager)**  
-**✅ Supported on IntelliJ-based IDEs starting from version 2024.2**
+**✅ Supported on IntelliJ-based IDEs starting from version 2023.2**
 
 This plugin lets you configure visibility preferences for well-known tool windows like *Bookmarks*, *Notifications*,
 etc., and ensures they automatically show or hide depending on the project.
