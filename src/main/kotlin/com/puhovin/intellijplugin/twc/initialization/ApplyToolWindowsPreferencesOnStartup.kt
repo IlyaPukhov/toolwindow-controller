@@ -31,6 +31,7 @@ class ApplyToolWindowsPreferencesOnStartup : ProjectActivity {
         ApplicationManager.getApplication().invokeAndWait {
             manager.initializeDefaultPreferences(project)
             manager.reset()
+            manager.applyPreferences(manager.getCurrentAvailabilityToolWindows())
         }
     }
 }
