@@ -1,10 +1,10 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.1.20"
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.kotlin.jvm") version "2.2.20"
+    id("org.jetbrains.intellij.platform") version "2.9.0"
 }
 
 group = "com.puhovin.intellijplugin"
-version = "1.2.2"
+version = "1.3.0"
 
 repositories {
     mavenCentral()
@@ -44,7 +44,8 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = "8.12"
+        distributionType = Wrapper.DistributionType.BIN
+        gradleVersion = "9.0.0"
     }
 
     register("printVersion") {
