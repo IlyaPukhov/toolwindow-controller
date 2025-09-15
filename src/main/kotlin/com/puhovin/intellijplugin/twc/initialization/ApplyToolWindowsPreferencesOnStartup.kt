@@ -28,9 +28,11 @@ class ApplyToolWindowsPreferencesOnStartup : ProjectActivity {
      */
     override suspend fun execute(project: Project) {
         val manager = ToolWindowPreferencesManager.getInstance(project)
+
         ApplicationManager.getApplication().invokeAndWait {
             manager.initializeDefaultPreferences(project)
             manager.reset()
+            manager.applyPreferences(manager.getCurrentAvailabilityToolWindows())
         }
     }
 }
