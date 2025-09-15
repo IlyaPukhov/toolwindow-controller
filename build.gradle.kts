@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity("2023.2")
+        create("IC", "2023.2")
     }
 }
 
@@ -30,7 +30,7 @@ tasks {
     patchPluginXml {
         pluginName = "ToolWindow Controller"
         sinceBuild = "232"
-        untilBuild = "252.*"
+        untilBuild = ""
     }
 
     signPlugin {

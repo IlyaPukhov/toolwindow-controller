@@ -1,9 +1,11 @@
 package com.puhovin.intellijplugin.twc.initialization
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import com.puhovin.intellijplugin.twc.core.ToolWindowPreferencesManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * This class implements the [ProjectActivity] interface and is responsible for
@@ -28,7 +30,8 @@ class ApplyToolWindowsPreferencesOnStartup : ProjectActivity {
      */
     override suspend fun execute(project: Project) {
         val manager = ToolWindowPreferencesManager.getInstance(project)
-        ApplicationManager.getApplication().invokeAndWait {
+
+        withContext(Dispatchers.EDT) {
             manager.initializeDefaultPreferences(project)
             manager.reset()
             manager.applyPreferences(manager.getCurrentAvailabilityToolWindows())
