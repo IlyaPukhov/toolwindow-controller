@@ -4,7 +4,7 @@
     <vendor email="dinamond2003@gmail.com">Ilya Pukhov</vendor>
     <description><![CDATA[
 <html>
-  <h2 style="margin-top:0;">🛠️ ToolWindow Controller</h2>
+  <h2 style="margin-top:0;">ToolWindow Controller</h2>
   <p>Manage tool windows visibility globally or per project.</p>
 
   <ul>
@@ -24,6 +24,11 @@
         <postStartupActivity
                 implementation="com.puhovin.intellijplugin.twc.initialization.ApplyToolWindowsPreferencesOnStartup" />
     </extensions>
+
+    <projectListeners>
+        <listener class="com.puhovin.intellijplugin.twc.initialization.ToolWindowRegistrationListener"
+                  topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener" />
+    </projectListeners>
 
     <resource-bundle>com.puhovin.intellijplugin.twc.bundle</resource-bundle>
 

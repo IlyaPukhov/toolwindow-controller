@@ -7,46 +7,36 @@ import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
 import java.io.Serializable
-import org.jetbrains.annotations.NotNull
 
+/** Сохраняет выбранный для проекта режим: глобальные или проектные предпочтения. */
 @Service(Service.Level.PROJECT)
 @State(name = "toolwindow-controller-mode", storages = [Storage("toolwindow-controller-settings.xml")])
 class ToolWindowControllerSettings : PersistentStateComponent<ToolWindowControllerSettings.SettingsState> {
 
     private var settingsState = SettingsState()
 
+    /** Формат сохраняемого в XML режима настроек. */
     @Tag("settings")
     data class SettingsState(
         @Attribute("settings-mode")
         var settingsMode: SettingsMode = SettingsMode.GLOBAL
     ) : Serializable
 
-    /**
-     * Gets the current state of the settings.
-     */
-    @NotNull
     override fun getState(): SettingsState {
         return settingsState
     }
 
-    /**
-     * Loads the state from the XML file.
-     */
-    override fun loadState(@NotNull state: SettingsState) {
+    override fun loadState(state: SettingsState) {
         this.settingsState = state
     }
 
-    /**
-     * Gets the current settings mode.
-     */
+    /** Возвращает выбранный для проекта режим. */
     fun getSettingsMode(): SettingsMode {
         return settingsState.settingsMode
     }
 
-    /**
-     * Sets the settings mode.
-     */
-    fun setSettingsMode(@NotNull settingsMode: SettingsMode) {
+    /** Сохраняет выбранный для проекта режим. */
+    fun setSettingsMode(settingsMode: SettingsMode) {
         settingsState.settingsMode = settingsMode
     }
 }

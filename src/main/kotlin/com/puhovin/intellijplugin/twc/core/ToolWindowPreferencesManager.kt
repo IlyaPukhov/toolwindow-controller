@@ -1,255 +1,91 @@
 package com.puhovin.intellijplugin.twc.core
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.wm.ToolWindowManager
-import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.AVAILABLE
 import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.UNAFFECTED
-import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.UNAVAILABLE
 import com.puhovin.intellijplugin.twc.model.SettingsMode
 import com.puhovin.intellijplugin.twc.model.ToolWindowControllerSettings
 import com.puhovin.intellijplugin.twc.model.ToolWindowPreference
 import com.puhovin.intellijplugin.twc.settingsmanager.GlobalToolWindowManagerService
 import com.puhovin.intellijplugin.twc.settingsmanager.ProjectToolWindowManagerService
 import com.puhovin.intellijplugin.twc.settingsmanager.SettingsManager
-import com.puhovin.intellijplugin.twc.ui.PreferredAvailabilitiesView
-import com.puhovin.intellijplugin.twc.ui.PreferredAvailabilitiesViewHolder
-import java.util.EnumMap
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
 
 /**
- * The ToolWindowPreferencesManager is responsible for managing and dispatching the preferences of tool windows
- * within a given project. It handles the initialization, application, and resetting of tool window preferences.
- * It provides functionality for switching between global and project-level settings for tool windows, applying
- * changes to the preferences, and ensuring that preferences are correctly reflected when the project is opened.
- *
- * <p>This class uses a lock mechanism to ensure thread safety when applying or resetting preferences, ensuring that
- * the tool window configurations are not modified concurrently in a multi-threaded environment.</p>
- *
- * @see ToolWindowPreference
- * @see SettingsManager
- * @see GlobalToolWindowManagerService
- * @see ProjectToolWindowManagerService
- * @see PreferredAvailabilitiesView
+ * Использует выбранный режим настроек проекта и отправляет предпочтения окон на применение.
+ * Запоминает ID переопределённых окон, чтобы при сбросе вернуть их исходную доступность.
  */
+@Service(Service.Level.PROJECT)
 class ToolWindowPreferencesManager(private val project: Project) {
-    private val lock: Lock = ReentrantLock()
-    private val settingsManagerMap: MutableMap<SettingsMode, SettingsManager> = EnumMap(SettingsMode::class.java)
-    private lateinit var _settingsMode: SettingsMode
+
+    private val appliedIds = mutableSetOf<String>()
 
     val settingsMode: SettingsMode
-        get() = _settingsMode
+        get() = project.service<ToolWindowControllerSettings>().getSettingsMode()
 
-    init {
-        initializeSettingsManagerMap()
-        loadSettingsMode()
+    private fun settings(mode: SettingsMode): SettingsManager = when (mode) {
+        SettingsMode.GLOBAL -> service<GlobalToolWindowManagerService>()
+        SettingsMode.PROJECT -> project.service<ProjectToolWindowManagerService>()
     }
 
-    companion object {
-        private val KEY = Key.create<ToolWindowPreferencesManager>("ToolWindowPreferencesManager")
-
-        /**
-         * Returns the singleton instance of ToolWindowPreferencesManager for the given project.
-         *
-         * @param project The project instance for which the manager is created or retrieved.
-         * @return An instance of ToolWindowPreferencesManager.
-         */
-        fun getInstance(project: Project): ToolWindowPreferencesManager {
-            return project.getUserData(KEY) ?: ToolWindowPreferencesManager(project).apply {
-                project.putUserData(KEY, this)
-            }
+    /** Возвращает зарегистрированные окна и настройки выбранного режима для таблицы. */
+    fun getAvailableToolWindows(mode: SettingsMode = settingsMode): List<ToolWindowPreference> {
+        ApplicationManager.getApplication().assertIsDispatchThread()
+        val preferences = settings(mode).getPreferences()
+        return ToolWindowManager.getInstance(project).toolWindowIds.sorted().map { id ->
+            ToolWindowPreference(id, preferences[id]?.availabilityPreference ?: UNAFFECTED)
         }
     }
 
-    /**
-     * Loads the current settings mode from the project settings.
-     */
-    private fun loadSettingsMode() {
-        val settings = project.getService(ToolWindowControllerSettings::class.java)
-        _settingsMode = settings.getSettingsMode()
-        switchSettingsMode(settingsMode)
+    /** Сравнивает черновик видимых окон и режим с сохранёнными настройками. */
+    fun isModified(mode: SettingsMode, preferences: List<ToolWindowPreference>): Boolean {
+        if (mode != settingsMode) return true
+        val saved = settings(mode).getPreferences()
+        return preferences.any { (saved[it.id]?.availabilityPreference ?: UNAFFECTED) != it.availabilityPreference }
     }
 
-    /**
-     * Initializes the settings manager map with services for global and project-level tool window management.
-     */
-    private fun initializeSettingsManagerMap() {
-        settingsManagerMap[SettingsMode.GLOBAL] = ApplicationManager.getApplication().getService(GlobalToolWindowManagerService::class.java)
-        settingsManagerMap[SettingsMode.PROJECT] = project.getService(ProjectToolWindowManagerService::class.java)
-    }
-
-    /**
-     * Applies the current preferences to the tool windows, either by saving changes or reverting to defaults.
-     */
-    fun apply() {
-        lock.lock()
-        try {
-            val view = PreferredAvailabilitiesViewHolder.getInstance(project)
-            val editedPrefs = view.getCurrentViewState()
-            applyPreferences(editedPrefs)
-        } finally {
-            lock.unlock()
+    /** Сохраняет настройки видимых окон, сохраняя записи окон, не зарегистрированных в этом проекте. */
+    fun apply(mode: SettingsMode, preferences: List<ToolWindowPreference>) {
+        ApplicationManager.getApplication().assertIsDispatchThread()
+        val previous = settings(settingsMode).getPreferences()
+        // В глобальном режиме здесь видны не все окна других проектов.
+        val updated = settings(mode).getPreferences().toMutableMap()
+        for (preference in preferences) {
+            val id = preference.id ?: continue
+            val availability = preference.availabilityPreference ?: UNAFFECTED
+            if (availability == UNAFFECTED) updated.remove(id)
+            else updated[id] = ToolWindowPreference(id, availability)
         }
+        settings(mode).setPreferences(updated)
+        project.service<ToolWindowControllerSettings>().setSettingsMode(mode)
+        applyResolvedPreferences(appliedIds + previous.keys + updated.keys, updated)
     }
 
-    /**
-     * Checks if any preferences have been modified.
-     *
-     * @return true if preferences have been modified; false otherwise.
-     */
-    fun isModified(): Boolean {
-        val view = PreferredAvailabilitiesViewHolder.getInstance(project)
-        val currentPrefs = getCurrentAvailabilityToolWindows().associateBy { it.id }
-        return view.getCurrentViewState().any { editedPref ->
-            val current = currentPrefs[editedPref.id]?.availabilityPreference ?: UNAFFECTED
-            current != editedPref.availabilityPreference
+    /** Применяет сохранённые настройки; [ids] ограничивает обработку только что добавленными окнами. */
+    fun applyCurrentPreferences(ids: List<String>? = null) {
+        ApplicationManager.getApplication().assertIsDispatchThread()
+        val saved = settings(settingsMode).getPreferences()
+        // Новое окно без настройки сохраняет доступность, заданную платформой.
+        applyResolvedPreferences(ids?.filter { it in saved } ?: (appliedIds + saved.keys), saved)
+    }
+
+    /** Удаляет переопределения выбранного режима и возвращает затронутые окна к исходному состоянию. */
+    fun restoreDefaults() {
+        ApplicationManager.getApplication().assertIsDispatchThread()
+        val current = settings(settingsMode)
+        val ids = appliedIds + current.getPreferences().keys
+        current.setPreferences(emptyMap())
+        applyResolvedPreferences(ids, emptyMap())
+    }
+
+    private fun applyResolvedPreferences(ids: Collection<String>, preferences: Map<String, ToolWindowPreference>) {
+        val resolved = ids.associateWith { preferences[it]?.availabilityPreference ?: UNAFFECTED }
+        for ((id, preference) in resolved) {
+            if (preference == UNAFFECTED) appliedIds.remove(id) else appliedIds.add(id)
         }
+        project.service<ToolWindowPreferenceApplier>().applyPreferences(resolved)
     }
 
-    /**
-     * Resets the tool windows to their default preferences.
-     */
-    fun reset() {
-        lock.lock()
-        try {
-            applyPreferences(getCurrentAvailabilityToolWindows())
-            val view = PreferredAvailabilitiesViewHolder.getInstance(project)
-            view.reset(getAvailableToolWindows())
-        } finally {
-            lock.unlock()
-        }
-    }
-
-    /**
-     * Applies the given preferences to the current settings manager.
-     *
-     * @param preferences A map of tool window IDs and their corresponding preferences.
-     */
-    fun applyPreferences(preferences: List<ToolWindowPreference>) {
-        lock.lock()
-        try {
-            val toSave = mutableMapOf<String, ToolWindowPreference?>()
-            preferences.forEach { pref ->
-                toSave[pref.id!!] = if (pref.availabilityPreference != UNAFFECTED) pref else null
-            }
-            getCurrentSettingsManager().setPreferences(toSave)
-            applyCurrentPreferences()
-        } finally {
-            lock.unlock()
-        }
-    }
-
-    /**
-     * Applies the current preferences to the tool windows.
-     */
-    private fun applyCurrentPreferences() {
-        val prefs = getCurrentAvailabilityToolWindows()
-        ToolWindowPreferenceApplier.getInstance(project).applyPreferencesFrom(prefs)
-    }
-
-    /**
-     * Retrieves the available tool windows based on their current preferences.
-     *
-     * @return A list of available tool window preferences.
-     */
-    fun getAvailableToolWindows(): List<ToolWindowPreference> {
-        val result = mutableListOf<ToolWindowPreference>()
-        val manager = ToolWindowManager.getInstance(project)
-
-        manager.toolWindowIds.forEach { id ->
-            val tw = manager.getToolWindow(id)
-            tw?.let {
-                val defaultPref =
-                    getCurrentSettingsManager().getDefaultPreferences()[id] ?: ToolWindowPreference(id, UNAFFECTED)
-                val pref = getCurrentSettingsManager().getPreferences()[id] ?: defaultPref
-                result.add(pref)
-            }
-        }
-
-        result.sortBy { it.id }
-        return result
-    }
-
-    /**
-     * Switches to a different settings mode (global or project-specific).
-     *
-     * @param settingsMode The new settings mode.
-     */
-    fun switchSettingsMode(settingsMode: SettingsMode) {
-        _settingsMode = settingsMode
-        saveSettingsMode(settingsMode)
-    }
-
-    /**
-     * Saves the current settings mode to the project settings.
-     *
-     * @param settingsMode The settings mode to save.
-     */
-    private fun saveSettingsMode(settingsMode: SettingsMode) {
-        val settings = project.getService(ToolWindowControllerSettings::class.java)
-        settings.setSettingsMode(settingsMode)
-    }
-
-    /**
-     * Retrieves the settings manager corresponding to the current settings mode.
-     *
-     * @return The current settings manager.
-     * @throws IllegalStateException if no SettingsManager is found for the current settings mode.
-     */
-    private fun getCurrentSettingsManager(): SettingsManager {
-        return settingsManagerMap[settingsMode]
-            ?: throw IllegalStateException("SettingsManager not found for $settingsMode")
-    }
-
-    /**
-     * Retrieves the current preferences for all tool windows.
-     *
-     * @return A list of tool window preferences.
-     */
-    fun getCurrentAvailabilityToolWindows(): List<ToolWindowPreference> {
-        return getCurrentSettingsManager().getPreferences().values.toList()
-    }
-
-    /**
-     * Retrieves the default preferences for all tool windows.
-     *
-     * @return A list of tool window preferences with default settings.
-     */
-    fun getDefaultAvailabilityToolWindows(): List<ToolWindowPreference> {
-        return getCurrentSettingsManager().getDefaultPreferences().values.toList()
-    }
-
-    /**
-     * Retrieves the default preference for a specific tool window.
-     *
-     * @param id The ID of the tool window.
-     * @return The default preference for the specified tool window.
-     */
-    fun getDefaultAvailabilityToolWindow(id: String?): ToolWindowPreference? {
-        return getCurrentSettingsManager().getDefaultAvailabilityToolWindow(id)
-    }
-
-    /**
-     * Initializes the default preferences for tool windows based on their current availability.
-     *
-     * @param project The project for which the default preferences are initialized.
-     */
-    fun initializeDefaultPreferences(project: Project) {
-        val defaultPreferences = mutableMapOf<String, ToolWindowPreference>()
-        val manager = ToolWindowManager.getInstance(project)
-
-        manager.toolWindowIds.forEach { id ->
-            val tw = manager.getToolWindow(id)
-            tw?.let {
-                val actualPref = if (tw.isAvailable) AVAILABLE else UNAVAILABLE
-                defaultPreferences[id] = ToolWindowPreference(id, actualPref)
-            }
-        }
-
-        settingsManagerMap.values.forEach { settingsManager ->
-            settingsManager.setDefaultPreferences(defaultPreferences)
-        }
-    }
 }

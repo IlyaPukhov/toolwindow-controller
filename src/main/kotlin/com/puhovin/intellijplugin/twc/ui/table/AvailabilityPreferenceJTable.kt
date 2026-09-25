@@ -5,7 +5,6 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.UIUtil
 import com.puhovin.intellijplugin.twc.model.AvailabilityPreference
-import org.jetbrains.annotations.NotNull
 import javax.swing.ComboBoxModel
 import javax.swing.DefaultCellEditor
 import javax.swing.DefaultComboBoxModel
@@ -17,15 +16,23 @@ import javax.swing.table.TableCellEditor
 import javax.swing.table.TableCellRenderer
 import javax.swing.table.TableModel
 
+/** Таблица окон с редактором доступности и подсветкой выбранного значения. */
 class AvailabilityPreferenceJTable(
-    @NotNull private val project: Project, model: TableModel
+    project: Project, model: TableModel
 ) : JBTable(model) {
+
     companion object {
         const val TOOL_WINDOW_ID_COLUMN_INDEX = 0
         const val AVAILABILITY_PREFERENCE_COLUMN_INDEX = 1
     }
 
     private val availabilityPreferenceCellEditor: TableCellEditor
+
+    private val renderers = mapOf(
+        AvailabilityPreference.AVAILABLE to ToolWindowPreferenceCellRenderer(project, JBColor.namedColor("FileColor.Green", JBColor(0xeffae7, 0x49544a))),
+        AvailabilityPreference.UNAFFECTED to ToolWindowPreferenceCellRenderer(project, UIUtil.getTableBackground()),
+        AvailabilityPreference.UNAVAILABLE to ToolWindowPreferenceCellRenderer(project, JBColor.namedColor("FileColor.Rose", JBColor(0xf2dcda, 0x6e535b)))
+    )
 
     init {
         val boxModel: ComboBoxModel<AvailabilityPreference> = DefaultComboBoxModel(AvailabilityPreference.entries.toTypedArray())
@@ -73,13 +80,6 @@ class AvailabilityPreferenceJTable(
             getValueAt(row, AVAILABILITY_PREFERENCE_COLUMN_INDEX) as AvailabilityPreference?
         val effectivePreference = availabilityPreference ?: AvailabilityPreference.UNAFFECTED
 
-        return when (effectivePreference) {
-            AvailabilityPreference.AVAILABLE ->
-                ToolWindowPreferenceCellRenderer(project, JBColor.namedColor("FileColor.Green", JBColor(0xeffae7, 0x49544a)))
-            AvailabilityPreference.UNAFFECTED ->
-                ToolWindowPreferenceCellRenderer(project, JBColor.WHITE)
-            AvailabilityPreference.UNAVAILABLE ->
-                ToolWindowPreferenceCellRenderer(project, JBColor.namedColor("FileColor.Rose", JBColor(0xf2dcda, 0x6e535b)))
-        }
+        return renderers.getValue(effectivePreference)
     }
 }

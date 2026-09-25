@@ -6,7 +6,9 @@ import com.puhovin.intellijplugin.twc.util.ToolWindowControllerBundle
 import java.text.MessageFormat
 import javax.swing.table.AbstractTableModel
 
+/** Модель черновика настроек; сортировку строк выполняет JTable. */
 class AvailabilityPreferenceTableModel : AbstractTableModel() {
+
     private val toolWindowPreferences: MutableList<ToolWindowPreference> = ArrayList()
 
     companion object {

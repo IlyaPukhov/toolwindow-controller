@@ -4,6 +4,7 @@ import java.util.ResourceBundle
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
+/** Читает локализованные строки из набора ресурсов плагина. */
 object ToolWindowControllerBundle {
     @NonNls
     private const val BUNDLE_PATH = "com.puhovin.intellijplugin.twc.bundle"

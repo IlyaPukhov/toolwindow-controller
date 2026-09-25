@@ -5,7 +5,7 @@
 <h1 align="center">🔧 ToolWindow Controller for Intellij-based IDEs</h1> 
 
 **Inspired by the outdated [ToolWindow Manager](https://plugins.jetbrains.com/plugin/1489-toolwindow-manager)**  
-**✅ Supported on IntelliJ-based IDEs starting from version 2023.2**
+**✅ Supported on IntelliJ-based IDEs starting from version 2026.2**
 
 This plugin lets you configure visibility preferences for well-known tool windows like *Bookmarks*, *Notifications*,
 etc., and ensures they automatically show or hide depending on the project.
@@ -84,3 +84,15 @@ If you want to build the plugin yourself:
     - Click the ⚙️ icon → `Install Plugin from Disk...`
     - Select the generated `.zip` file
 6. Restart the IDE if prompted
+
+
+## Development and availability semantics
+
+- Build with JDK 25: `./gradlew test buildPlugin verifyPluginStructure verifyPlugin`.
+- Use an installed IDE for development: `./gradlew test -PidePath="/path/to/idea"`.
+- `Show`/`Hide` control tool-window availability, including its stripe button; `Show` does not activate or focus the window.
+- `Default` restores the availability observed before this plugin first changed that window in the current project session, and removes its saved override.
+- `Restore Default Availabilities` removes all overrides from the selected scope, including windows not currently registered. Restoring availability does not reopen previously visible content.
+- Global preferences are shared; applying changes updates the current project. Other projects pick them up on startup, registration of a configured window, or `Reapply Preferred Availabilities`.
+- Late tool-window registration is handled by an event listener. There is no polling or continuous enforcement against other plugins changing availability.
+- Opening, resetting or cancelling the settings dialog does not save preferences or change tool-window availability.

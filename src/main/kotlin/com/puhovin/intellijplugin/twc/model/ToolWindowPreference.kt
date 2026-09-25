@@ -5,6 +5,7 @@ import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
 import java.io.Serializable
 
+/** Настройка одного окна; поля допускают null ради чтения ранее сохранённого XML. */
 @Tag("toolwindow")
 class ToolWindowPreference() : Serializable {
 

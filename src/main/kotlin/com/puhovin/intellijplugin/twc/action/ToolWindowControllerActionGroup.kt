@@ -3,29 +3,14 @@ package com.puhovin.intellijplugin.twc.action
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.DumbAware
 
-/**
- * Action group for controlling tool window actions.
- */
-class ToolWindowControllerActionGroup : DefaultActionGroup() {
+/** Показывает действия плагина только при наличии открытого проекта. */
+class ToolWindowControllerActionGroup : DefaultActionGroup(), DumbAware {
 
-    /**
-     * Gets the action update thread.
-     *
-     * @return The action update thread to be used for this action
-     */
-    override fun getActionUpdateThread(): ActionUpdateThread {
-        return ActionUpdateThread.EDT
-    }
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
-    /**
-     * Updates the action visibility and enablement based on the project state.
-     *
-     * @param e The action event containing the project context
-     */
     override fun update(e: AnActionEvent) {
-        val project: Project? = e.project
-        e.presentation.isEnabledAndVisible = project != null
+        e.presentation.isEnabledAndVisible = e.project != null
     }
 }

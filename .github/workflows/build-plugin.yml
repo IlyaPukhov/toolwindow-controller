@@ -2,72 +2,69 @@ name: Build and Release Plugin
 
 on:
   push:
-    branches: [ releases/** ]
+    branches: [ 'releases/**' ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  test:
+    name: Run tests
     runs-on: ubuntu-latest
-    outputs:
-      commit_short: ${{ steps.vars.outputs.COMMIT_SHORT }}
-      version: ${{ steps.extract_version.outputs.VERSION }}
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: '25'
+          cache: gradle
+
+      - name: Run tests
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon test
+
+  release:
+    name: Build and release
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
           cache: gradle
 
       - name: Build plugin
         run: |
           chmod +x gradlew
-          ./gradlew buildPlugin
-
-      - name: Extract version
-        id: extract_version
-        run: |
-          VERSION=$(./gradlew -q printVersion)
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          ./gradlew --no-daemon clean buildPlugin verifyPluginStructure
 
       - name: Get short commit hash
-        id: vars
-        run: |
-          COMMIT_SHORT=$(git rev-parse --short ${{ github.sha }})
-          echo "COMMIT_SHORT=$COMMIT_SHORT" >> $GITHUB_OUTPUT
+        id: commit
+        run: echo "short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Upload plugin artifact
-        uses: actions/upload-artifact@v4
+      - name: Get Gradle version
+        id: version
+        run: echo "version=$(./gradlew -q printVersion)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v3
         with:
-          name: plugin-artifacts
-          path: build/distributions/*.zip
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download plugin artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: plugin-artifacts
-
-      - name: Prepare release metadata
-        run: |
-          echo "RELEASE_DATE=$(date +'%d.%m.%Y')" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-
-      - name: Create and upload GitHub Release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: build-${{ needs.build.outputs.commit_short }}
-          name: Release v${{ needs.build.outputs.version }}-${{ needs.build.outputs.commit_short }}
-          body: |
-            Automatic build from commit ${{ github.sha }} (built on ${{ env.RELEASE_DATE }})
-            Branch: ${{ env.BRANCH_NAME }}
-          files: |
-            *.zip
+          tag_name: v${{ steps.version.outputs.version }}-${{ steps.commit.outputs.short }}
+          name: Release v${{ steps.version.outputs.version }}-${{ steps.commit.outputs.short }}
+          target_commitish: ${{ github.sha }}
+          files: build/distributions/toolwindow-controller-${{ steps.version.outputs.version }}.zip
+          fail_on_unmatched_files: true

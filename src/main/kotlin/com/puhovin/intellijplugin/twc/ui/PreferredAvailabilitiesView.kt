@@ -11,50 +11,36 @@ import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.JCheckBox
 import javax.swing.JPanel
-import org.jetbrains.annotations.NotNull
 
-class PreferredAvailabilitiesView(
-    @NotNull project: Project,
-    @NotNull private val manager: ToolWindowPreferencesManager
-) : JPanel(BorderLayout()) {
+/** Таблица предпочтений и выбор глобального или проектного режима без побочных действий до Apply. */
+class PreferredAvailabilitiesView(project: Project, private val manager: ToolWindowPreferencesManager) : JPanel(BorderLayout()) {
 
-    private val table: AvailabilityPreferenceJTable
+    private val model = AvailabilityPreferenceTableModel()
+    private val table = AvailabilityPreferenceJTable(project, model)
+    private val globalModeCheckbox = JCheckBox("Use global settings")
+
+    val settingsMode: SettingsMode get() = SettingsMode.fromBoolean(globalModeCheckbox.isSelected)
 
     init {
-        val topPanel = initializePanel()
-        add(topPanel, BorderLayout.NORTH)
-
-        table = AvailabilityPreferenceJTable(project, AvailabilityPreferenceTableModel())
+        add(JPanel(FlowLayout(FlowLayout.LEFT)).apply { add(globalModeCheckbox) }, BorderLayout.NORTH)
         add(JBScrollPane(table), BorderLayout.CENTER)
-
-        populateTableModel(manager.getAvailableToolWindows())
-    }
-
-    private fun initializePanel(): JPanel {
-        val globalModeCheckbox = JCheckBox("Use global settings")
-        globalModeCheckbox.isSelected = manager.settingsMode.value
         globalModeCheckbox.addActionListener {
-            val useGlobal = globalModeCheckbox.isSelected
-            manager.switchSettingsMode(SettingsMode.fromBoolean(useGlobal))
-            populateTableModel(manager.getAvailableToolWindows())
+            table.cellEditor?.cancelCellEditing()
+            model.setToolWindowPreferences(manager.getAvailableToolWindows(settingsMode))
         }
-
-        return JPanel(FlowLayout(FlowLayout.LEFT)).apply {
-            add(globalModeCheckbox)
-        }
+        reset()
     }
 
-    private fun populateTableModel(preferences: List<ToolWindowPreference>) {
-        val model = table.model as AvailabilityPreferenceTableModel
-        model.setToolWindowPreferences(preferences)
+    /** Возвращает черновик; перед сохранением завершает текущее редактирование ячейки. */
+    fun getCurrentViewState(commitEditor: Boolean = false): List<ToolWindowPreference> {
+        if (commitEditor) table.cellEditor?.stopCellEditing()
+        return model.getToolWindowPreferences()
     }
 
-    @NotNull
-    fun getCurrentViewState(): List<ToolWindowPreference> {
-        return (table.model as AvailabilityPreferenceTableModel).getToolWindowPreferences()
-    }
-
-    fun reset(@NotNull defaultPreferences: List<ToolWindowPreference>) {
-        populateTableModel(defaultPreferences)
+    /** Отбрасывает черновик и заново показывает сохранённые настройки. */
+    fun reset() {
+        table.cellEditor?.cancelCellEditing()
+        globalModeCheckbox.isSelected = manager.settingsMode.value
+        model.setToolWindowPreferences(manager.getAvailableToolWindows())
     }
 }
