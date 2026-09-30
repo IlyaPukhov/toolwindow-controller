@@ -7,8 +7,8 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.puhovin.intellijplugin.twc.model.AvailabilityPreference
 import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.AVAILABLE
-import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.UNAVAILABLE
 import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.UNAFFECTED
+import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.UNAVAILABLE
 
 /**
  * Применяет доступность окон проекта. Несколько запросов до выполнения очереди IDE объединяются:
@@ -17,7 +17,7 @@ import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.UNAFFECTED
 @Service(Service.Level.PROJECT)
 class ToolWindowPreferenceApplier(private val project: Project) {
 
-    private val pending = linkedMapOf<String, AvailabilityPreference>()
+    private var pending = linkedMapOf<String, AvailabilityPreference>()
     private val defaults = mutableMapOf<String, DefaultAvailability>()
     private var scheduled = false
 
@@ -33,16 +33,17 @@ class ToolWindowPreferenceApplier(private val project: Project) {
         scheduled = true
         ToolWindowManager.getInstance(project).invokeLater {
             scheduled = false
-            val batch = pending.toMap()
-            pending.clear()
+            applyPendingPreferences()
+        }
+    }
+
+    /** Вычисляет и применяет настройки в одной задаче EDT; можно вызывать из фонового потока. */
+    fun applyPreferences(resolvePreferences: () -> Map<String, AvailabilityPreference>) {
+        if (project.isDisposed) return
+        ToolWindowManager.getInstance(project).invokeLater {
             if (!project.isDisposed) {
-                val manager = ToolWindowManager.getInstance(project)
-                for ((id, preference) in batch) {
-                    val window = manager.getToolWindow(id) ?: continue
-                    val original = defaults[id]?.takeIf { it.window === window }
-                        ?: DefaultAvailability(window, window.isAvailable).also { defaults[id] = it }
-                    applyAvailability(window, preference, original.available)
-                }
+                pending.putAll(resolvePreferences())
+                applyPendingPreferences()
             }
         }
     }
@@ -52,6 +53,19 @@ class ToolWindowPreferenceApplier(private val project: Project) {
         ApplicationManager.getApplication().assertIsDispatchThread()
         defaults.remove(id)
         pending.remove(id)
+    }
+
+    private fun applyPendingPreferences() {
+        val batch = pending
+        pending = linkedMapOf()
+        if (project.isDisposed || batch.isEmpty()) return
+        val manager = ToolWindowManager.getInstance(project)
+        for ((id, preference) in batch) {
+            val window = manager.getToolWindow(id) ?: continue
+            val original = defaults[id]?.takeIf { it.window === window }
+                ?: DefaultAvailability(window, window.isAvailable).also { defaults[id] = it }
+            applyAvailability(window, preference, original.available)
+        }
     }
 
     private fun applyAvailability(window: ToolWindow, preference: AvailabilityPreference, default: Boolean) {

@@ -5,6 +5,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
+import com.puhovin.intellijplugin.twc.model.AvailabilityPreference
 import com.puhovin.intellijplugin.twc.model.AvailabilityPreference.UNAFFECTED
 import com.puhovin.intellijplugin.twc.model.SettingsMode
 import com.puhovin.intellijplugin.twc.model.ToolWindowControllerSettings
@@ -49,26 +50,40 @@ class ToolWindowPreferencesManager(private val project: Project) {
     /** Сохраняет настройки видимых окон, сохраняя записи окон, не зарегистрированных в этом проекте. */
     fun apply(mode: SettingsMode, preferences: List<ToolWindowPreference>) {
         ApplicationManager.getApplication().assertIsDispatchThread()
-        val previous = settings(settingsMode).getPreferences()
+        val previousMode = settingsMode
+        val previous = settings(previousMode).getPreferences()
+        val target = settings(mode)
         // В глобальном режиме здесь видны не все окна других проектов.
-        val updated = settings(mode).getPreferences().toMutableMap()
+        val updated = (if (mode == previousMode) previous else target.getPreferences()).toMutableMap()
         for (preference in preferences) {
             val id = preference.id ?: continue
             val availability = preference.availabilityPreference ?: UNAFFECTED
             if (availability == UNAFFECTED) updated.remove(id)
             else updated[id] = ToolWindowPreference(id, availability)
         }
-        settings(mode).setPreferences(updated)
+        target.setPreferences(updated)
         project.service<ToolWindowControllerSettings>().setSettingsMode(mode)
         applyResolvedPreferences(appliedIds + previous.keys + updated.keys, updated)
     }
 
-    /** Применяет сохранённые настройки; [ids] ограничивает обработку только что добавленными окнами. */
+    /**
+     * Применяет сохранённые настройки; [ids] ограничивает обработку только что добавленными окнами.
+     * При вызове из фонового потока чтение настроек и применение выполняются в одной задаче EDT.
+     */
     fun applyCurrentPreferences(ids: List<String>? = null) {
+        val applier = project.service<ToolWindowPreferenceApplier>()
+        if (ApplicationManager.getApplication().isDispatchThread) {
+            applier.applyPreferences(resolveCurrentPreferences(ids))
+        } else {
+            applier.applyPreferences { resolveCurrentPreferences(ids) }
+        }
+    }
+
+    private fun resolveCurrentPreferences(ids: List<String>?): Map<String, AvailabilityPreference> {
         ApplicationManager.getApplication().assertIsDispatchThread()
         val saved = settings(settingsMode).getPreferences()
         // Новое окно без настройки сохраняет доступность, заданную платформой.
-        applyResolvedPreferences(ids?.filter { it in saved } ?: (appliedIds + saved.keys), saved)
+        return resolvePreferences(ids?.filter { it in saved } ?: (appliedIds + saved.keys), saved)
     }
 
     /** Удаляет переопределения выбранного режима и возвращает затронутые окна к исходному состоянию. */
@@ -81,11 +96,18 @@ class ToolWindowPreferencesManager(private val project: Project) {
     }
 
     private fun applyResolvedPreferences(ids: Collection<String>, preferences: Map<String, ToolWindowPreference>) {
+        project.service<ToolWindowPreferenceApplier>().applyPreferences(resolvePreferences(ids, preferences))
+    }
+
+    private fun resolvePreferences(
+        ids: Collection<String>,
+        preferences: Map<String, ToolWindowPreference>
+    ): Map<String, AvailabilityPreference> {
         val resolved = ids.associateWith { preferences[it]?.availabilityPreference ?: UNAFFECTED }
         for ((id, preference) in resolved) {
             if (preference == UNAFFECTED) appliedIds.remove(id) else appliedIds.add(id)
         }
-        project.service<ToolWindowPreferenceApplier>().applyPreferences(resolved)
+        return resolved
     }
 
 }
